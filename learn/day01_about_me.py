@@ -19,8 +19,8 @@ degree = {
 }
 
 # --- f-strings: like JavaScript template literals (`Hi ${name}`) ---
-print(f"Hi, I'm {name}, a {title}.")
-print(f"I'm studying {degree['program']} at {degree['school']}, focused on {degree['focus']}.")
+print(f"Hi, I am {name}, a {title}.")
+print(f"I am studying {degree['program']} at {degree['school']}, focused on {degree['focus']}.")
 
 # len() counts items, like skills.length in JavaScript
 # ", ".join(list) is like list.join(", ") in JavaScript
