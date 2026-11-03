@@ -5,5 +5,6 @@ Built in 30 days, November 2026: Python, FastAPI, Claude, PostgreSQL + pgvector,
 
 ## Run
 ```
-uv run python learn/day01_about_me.py
+uv run python learn/day01_about_me.py   # Day 1: Python basics
+uv run python -m anamul_ai.collect      # Day 2: download articles and book notes into data/
 ```

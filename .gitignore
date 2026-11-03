@@ -11,3 +11,7 @@ wheels/
 
 # Secrets (API keys) never go to GitHub
 .env
+
+# Mac and editor files
+.DS_Store
+.Rhistory
