@@ -3,6 +3,24 @@
 A chatbot that answers questions about Anamul Hasan (resume, projects, articles and book notes), with sources.
 Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvector, LangGraph, AWS.
 
+## How it works
+1. **Collect:** my articles, book notes, resume, About page and projects are saved as Markdown in `data/`.
+2. **Chunk:** everything is split into small sections, each labeled with where it came from (like *Resume > Work experience > DevOps Engineer*).
+3. **Search** *(coming in Week 2)*: find the chunks that match a question by meaning, using embeddings in PostgreSQL + pgvector.
+4. **Answer** *(coming in Week 2)*: Claude writes the answer from those chunks and cites its sources.
+5. **Ship** *(coming in Weeks 3–4)*: an API on AWS and a chat widget on [anamulhasan.com](https://www.anamulhasan.com).
+
+## Progress
+- [x] Day 1: set up Python with uv, and learn Python basics as a JavaScript developer
+- [x] Day 2: download my articles and book notes from anamulhasan.com
+- [x] Day 3: add my resume, About page and projects, then split everything into 87 searchable chunks
+- [ ] Rest of Week 1: Python and FastAPI
+- [ ] Week 2: Claude API, search with pgvector, and a set of test questions
+- [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
+- [ ] Week 4: chat widget on anamulhasan.com, a LangGraph agent, and launch
+
+What I learned each day is in [LEARNING.md](LEARNING.md).
+
 ## Run
 ```
 uv run python learn/day01_about_me.py   # Day 1: Python basics
