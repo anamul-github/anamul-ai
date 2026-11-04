@@ -15,3 +15,6 @@ wheels/
 # Mac and editor files
 .DS_Store
 .Rhistory
+
+# Built by chunk.py; rebuild it any time with: uv run python -m anamul_ai.chunk
+data/chunks.jsonl

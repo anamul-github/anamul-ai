@@ -1,7 +1,7 @@
 [project]
 name = "anamul-ai"
 version = "0.1.0"
-description = "Add your description here"
+description = "A chatbot that answers questions about Anamul Hasan, with sources."
 readme = "README.md"
 authors = [
     { name = "Anamul Hasan", email = "anamul.jobhunt@gmail.com" }
@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "httpx>=0.28.1",
     "markdownify>=1.2.3",
+    "pypdf>=6.21.4",
 ]
 
 [project.scripts]
