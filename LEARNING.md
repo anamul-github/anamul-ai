@@ -29,3 +29,17 @@
 **My answer (1):** We split data into chunks because it's cost effective: Claude gets fewer words with each question. The bot sends only the chunks that match the question, so the answer is focused instead of going over unrelated sources. Each chunk also carries its URL and section, so the answer can show where it came from.
 
 **My answer (2):** Each chunk starts with where it came from (resume > Work experience > DevOps Engineer) because the bot finds and reads each chunk on its own. The header adds words like "OATI" and "DevOps Engineer" so the search can match the question, and it tells Claude whose work this is and in which role, so the answer is accurate.
+
+## Day 4 (Nov 5): My first API with FastAPI
+- An API lets other programs ask my project for data over the web. Later, the chat widget on my site will call this one.
+- `uv add "fastapi[standard]"` installs FastAPI, and `uv run fastapi dev src/anamul_ai/api.py` runs a server that restarts whenever I save a file.
+- `@app.get("/search")` above a function is like `app.get("/search", handler)` in Express. Returning a dict or a list sends JSON, like `res.json()`.
+- Function parameters become URL inputs: `def search(q: str, limit: int = 5)` reads `?q=...&limit=5`. FastAPI rejects `limit=abc` with a 422 error on its own. `raise HTTPException(status_code=404)` is like `res.status(404)`.
+- A Pydantic model (`class Chunk(BaseModel)`) describes the shape of the data, like a TypeScript interface. FastAPI uses it to check the data and to build the `/docs` page for free.
+- Sets: `a & b` keeps the words both have, and `a - b` removes words.
+- I tested keyword search with recruiter questions. "What did Anamul do at OATI?" worked, "Does he know cloud and DevOps?" half worked, and "Is he a good leader?" and "What does he like to do for fun?" missed completely.
+- Keyword search counts filler words like "your" and "like" the same as important words, can't tell cloud storage from cloud computing, and breaks ties by file order instead of relevance.
+
+**My answer (1):** The API receives a question over the web, scores every chunk by how many words match, and sends back the best-matching chunks as JSON.
+
+**My answer (2):** "Is he a good leader?" missed because my resume says "led" and "onboarding support", not "leader". Keyword search only matches exact words, so it can't tell they mean the same thing. Searching by meaning (semantic search with embeddings, Week 2) would fix it.

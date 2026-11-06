@@ -14,6 +14,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 1: set up Python with uv, and learn Python basics as a JavaScript developer
 - [x] Day 2: download my articles and book notes from anamulhasan.com
 - [x] Day 3: add my resume, About page and projects, then split everything into 87 searchable chunks
+- [x] Day 4: my first API with FastAPI, with a keyword search that showed why the bot needs to search by meaning
 - [ ] Rest of Week 1: Python and FastAPI
 - [ ] Week 2: Claude API, search with pgvector, and a set of test questions
 - [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
@@ -27,4 +28,5 @@ uv run python learn/day01_about_me.py   # Day 1: Python basics
 uv run python -m anamul_ai.collect      # Day 2: download articles and book notes into data/
 uv run python -m anamul_ai.resume ~/Desktop/Anamul-Hasan-Resume.pdf   # Day 3: resume PDF to data/profile/resume.md (phone removed)
 uv run python -m anamul_ai.chunk        # Day 3: split data/ into searchable chunks (data/chunks.jsonl)
+uv run fastapi dev src/anamul_ai/api.py # Day 4: the API; try it at http://127.0.0.1:8000/docs
 ```
