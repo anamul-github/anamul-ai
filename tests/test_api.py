@@ -36,3 +36,26 @@ def test_search_finds_my_oati_job():
     results = client.get("/search", params={"q": "What did Anamul do at OATI?"}).json()
     assert len(results) > 0
     assert all(result["chunk"]["type"] == "resume" for result in results)
+
+
+# --- Day 6: POST /ask ---
+
+def test_ask_returns_an_answer_with_sources():
+    response = client.post("/ask", json={"question": "What did Anamul do at OATI?"})  # json= sends a request body
+    assert response.status_code == 200
+    body = response.json()
+    assert body["answer"] != ""
+    assert body["sources"][0]["url"] == "https://www.linkedin.com/in/anamul-hasan"  # OATI is on my resume
+
+
+def test_ask_rejects_a_question_that_is_too_short():
+    assert client.post("/ask", json={"question": "hi"}).status_code == 422
+
+
+def test_ask_rejects_a_question_that_is_too_long():
+    assert client.post("/ask", json={"question": "why " * 100}).status_code == 422  # 400 characters, over the 300 limit
+
+
+def test_ask_says_so_when_nothing_matches():
+    body = client.post("/ask", json={"question": "xylophone zebra"}).json()
+    assert body["sources"] == []

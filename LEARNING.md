@@ -56,3 +56,16 @@
 **My answer (1):** A test checks that my code actually does what I wanted. It runs the code step by step, passes when everything works, and fails with an error showing what broke. That way I find problems in seconds, without checking by hand.
 
 **My answer (2):** In Week 2, search by meaning will find answers like my hobbies, where keyword search returned unrelated articles. When we swap the search, the tests are a safety net: if they still pass, the rest of the API still works, and if something breaks, a test fails and shows me where.
+
+## Day 6 (Nov 6): POST /ask, the endpoint the chat widget will call
+- `POST /ask` takes `{"question": "..."}` and returns `{"question", "answer", "sources"}`. For now the answer is the best-matching chunk. In Week 2, Claude writes the answer from the same chunks, and the shape stays the same, so the widget won't need to change.
+- `@app.post("/ask")` with `def ask(request: AskRequest)` reads the JSON body, like `req.body` in Express, but checks it against a Pydantic model first.
+- `Field(min_length=3, max_length=300)` adds rules. Bad input gets a 422 with a clear message (`string_too_short`, `"String should have at least 3 characters"`) before my code runs.
+- A route is still a normal function, so `/ask` reuses `search()` from Day 4.
+- Pydantic models compare by their fields, so `if source not in sources` skips duplicate sources.
+- Tests send a POST with `client.post("/ask", json={...})`. Now there are 12 tests, all passing.
+- `fastapi dev` reloads when I save a file. My Day 4 server was still running, so a new one couldn't start ("Address already in use" on port 8000). `kill <process id>` stopped it. Next time: press Ctrl+C in the server's tab when I'm done.
+
+**My answer (1):** `/search` is a GET because it only reads (looks up) chunks, with the question in the URL. `/ask` is a POST because the chat widget sends the visitor's question in the request body as JSON. The question goes to my API, and my API calls Claude, so my secret API key stays on my server, never in the browser.
+
+**My answer (2):** A question under 3 characters, like "hi", is too short to answer. The 300-character maximum keeps each question cheap once Claude answers it, and stops people from pasting huge text or misusing the bot. A real recruiter question easily fits.

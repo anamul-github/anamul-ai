@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel  # Pydantic checks that data has the right fields and types
+from pydantic import BaseModel, Field  # Pydantic checks that data has the right fields and types
 
 CHUNKS_FILE = Path("data/chunks.jsonl")
 WORD = re.compile(r"[a-z0-9]+")
@@ -93,3 +93,42 @@ def search(q: str, limit: int = 5) -> list[SearchResult]:
             results.append(SearchResult(score=score, chunk=chunk))
     results.sort(key=lambda result: result.score, reverse=True)  # Highest score first, like .sort((a, b) => b.score - a.score)
     return results[:limit]  # The first `limit` results, like .slice(0, limit)
+
+
+# --- Day 6: the endpoint the chat widget will call ---
+
+class AskRequest(BaseModel):  # The JSON the widget sends: {"question": "..."}
+    # Field() adds rules. FastAPI rejects anything outside them with a 422, before my code runs.
+    # The 300-character limit also keeps each question cheap once Claude answers it in Week 2.
+    question: str = Field(min_length=3, max_length=300)
+
+
+class Source(BaseModel):  # Where an answer came from, so the widget can show a link
+    title: str
+    url: str
+    section: str
+
+
+class AskResponse(BaseModel):  # The JSON the widget gets back
+    question: str
+    answer: str
+    sources: list[Source]
+
+
+@app.post("/ask")  # POST, not GET: the question travels in the request body as JSON, like fetch(url, {method: "POST", body})
+def ask(request: AskRequest) -> AskResponse:
+    """Answer a question about Anamul, with sources.
+
+    For now, the answer is the best-matching chunk. In Week 2, Claude will write
+    the answer from these same chunks, and this endpoint's shape stays the same.
+    """
+    results = search(request.question, limit=3)  # Reuse Day 4's search; a route is still a normal function
+    if not results:
+        return AskResponse(question=request.question, answer="I couldn't find anything about that yet.", sources=[])
+
+    sources = []
+    for result in results:
+        source = Source(title=result.chunk.title, url=result.chunk.url, section=result.chunk.section)
+        if source not in sources:  # Two chunks from the same section would be the same source; list it once
+            sources.append(source)
+    return AskResponse(question=request.question, answer=results[0].chunk.text, sources=sources)

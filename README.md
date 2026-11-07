@@ -16,6 +16,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 3: add my resume, About page and projects, then split everything into 87 searchable chunks
 - [x] Day 4: my first API with FastAPI, with a keyword search that showed why the bot needs to search by meaning
 - [x] Day 5: 8 automated tests with pytest for the chunker and the API
+- [x] Day 6: `POST /ask`, the endpoint the chat widget will call, which returns an answer with its sources (12 tests)
 - [ ] Rest of Week 1: Python and FastAPI
 - [ ] Week 2: Claude API, search with pgvector, and a set of test questions
 - [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
