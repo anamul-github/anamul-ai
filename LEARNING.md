@@ -43,3 +43,16 @@
 **My answer (1):** The API receives a question over the web, scores every chunk by how many words match, and sends back the best-matching chunks as JSON.
 
 **My answer (2):** "Is he a good leader?" missed because my resume says "led" and "onboarding support", not "leader". Keyword search only matches exact words, so it can't tell they mean the same thing. Searching by meaning (semantic search with embeddings, Week 2) would fix it.
+
+## Day 5 (Nov 6): Tests with pytest
+- `uv add --dev pytest` installs pytest as a development tool: I need it to build the project, but the bot doesn't need it to run. It's like `devDependencies` in `package.json`.
+- pytest runs every function whose name starts with `test_` in `tests/`. `assert` means "this must be true, or the test fails". pytest is like Jest: `assert x == 5` is `expect(x).toBe(5)`, and `uv run pytest` is `npm test`.
+- `TestClient` is a fake browser that calls the API in memory, so no server needs to be running.
+- Test what matters, not numbers that will change: the home page test checks `chunks > 0`, not `== 87`, so it still passes when I add articles.
+- `all(...)` is like `.every()` in JavaScript.
+- I broke a test on purpose (404 changed to 200). The output showed the failing test's name, the exact line (`test_api.py:28`) and the real values (`assert 404 == 200`). Then I fixed it and saw `8 passed` again.
+- Result: 8 tests for the chunker and the API, all passing in under a second.
+
+**My answer (1):** A test checks that my code actually does what I wanted. It runs the code step by step, passes when everything works, and fails with an error showing what broke. That way I find problems in seconds, without checking by hand.
+
+**My answer (2):** In Week 2, search by meaning will find answers like my hobbies, where keyword search returned unrelated articles. When we swap the search, the tests are a safety net: if they still pass, the rest of the API still works, and if something breaks, a test fails and shows me where.
