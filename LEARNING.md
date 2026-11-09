@@ -82,3 +82,18 @@
 **My answer (1):** My API key lives in `.env` because `.gitignore` keeps that file off GitHub, so nobody can see or steal the key and run up charges on my account. If a key is ever committed, deleting it later doesn't help, because it stays in the git history. `.env.example` shows which settings exist, without the real values.
 
 **My answer (2):** Tokens are the pieces of text (about ¾ of a word each) that Claude reads as input and writes as output. I pay for every token, and output costs 5 times more than input on Opus 5.5. That's why the bot sends only the few matching chunks, and why I'll limit how much each visitor can ask.
+
+## Day 8 (Nov 9): Claude writes the answers
+- `/ask` now works like a real RAG bot: keyword search finds the 5 best chunks, Claude writes a two-to-four sentence answer from them, and the answer comes back with its sources. If nothing matches, it doesn't call Claude at all, so it costs nothing.
+- I chose Claude Opus 5.5 (the best answers, about 1–2 cents per question) and the first person: the bot speaks as me, and says it's an AI assistant if someone asks.
+- The system prompt (`SYSTEM_PROMPT` in `answer.py`) goes in `system=`. The chunks go in the user message inside `<source>` tags, so Claude can tell them apart.
+- `@cache` creates the settings and the Claude client once and then reuses them, like a memoized function.
+- `except anthropic.APIError` turns a Claude outage into a polite 503 ("try again in a minute") instead of a crash.
+- The tests use a pytest fixture, `fake_claude`, which uses `monkeypatch` to swap `write_answer` for a fake. All 14 tests pass even with no API key.
+- Bug found and fixed: since the bot speaks as me, visitors ask "you". My articles say "you" a lot, so "What did you do at OATI?" found zero OATI chunks. Adding "you" and "your" to the stop words fixed it, and a test guards it.
+- Real answers: "What did you do at OATI?" and "What are your hobbies?" were accurate, in my voice, from my resume and About page. "What are you good at?" got the wrong chunks, and Claude honestly said it didn't know instead of inventing skills. "Tell me about yourself?" found no chunks at all.
+- The answer can only be as good as the chunks search finds. Claude is ready; search is the weak link, so search by meaning is next.
+
+**My answer (1):** The system prompt is Claude's standing instructions: who it is (me, speaking in the first person), how to answer (short and humble), and the rules. "Use only the sources" means Claude answers only from the chunks search found, without guessing. When the chunks didn't cover "What are you good at?", it said so instead of making up skills.
+
+**My answer (2):** The tests check my code, not Claude, so they use a fake Claude. The real one would cost money on every test run, take seconds per answer, need my API key (which must never be on GitHub), and word its answer differently each time. The fake is free, instant and always gives the same answer.

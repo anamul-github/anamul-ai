@@ -6,8 +6,8 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 ## How it works
 1. **Collect:** my articles, book notes, resume, About page and projects are saved as Markdown in `data/`.
 2. **Chunk:** everything is split into small sections, each labeled with where it came from (like *Resume > Work experience > DevOps Engineer*).
-3. **Search** *(coming in Week 2)*: find the chunks that match a question by meaning, using embeddings in PostgreSQL + pgvector.
-4. **Answer** *(coming in Week 2)*: Claude writes the answer from those chunks and cites its sources.
+3. **Search:** find the chunks that match a question. Keyword search for now; search by meaning, using embeddings in PostgreSQL + pgvector, is coming in Week 2.
+4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and returns its sources.
 5. **Ship** *(coming in Weeks 3–4)*: an API on AWS and a chat widget on [anamulhasan.com](https://www.anamulhasan.com).
 
 ## Progress
@@ -18,6 +18,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 5: 8 automated tests with pytest for the chunker and the API
 - [x] Day 6: `POST /ask`, the endpoint the chat widget will call, which returns an answer with its sources (12 tests)
 - [x] Day 7: my first message to Claude through the API, with the key kept safely in `.env`
+- [x] Day 8: Claude writes the answers in `/ask`, in my voice, using only the matching chunks (14 tests)
 - [ ] Week 2: Claude API, search with pgvector, and a set of test questions
 - [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
 - [ ] Week 4: chat widget on anamulhasan.com, a LangGraph agent, and launch

@@ -10,8 +10,11 @@ import json
 import re
 from pathlib import Path
 
+import anthropic
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field  # Pydantic checks that data has the right fields and types
+
+from anamul_ai.answer import write_answer
 
 CHUNKS_FILE = Path("data/chunks.jsonl")
 WORD = re.compile(r"[a-z0-9]+")
@@ -20,6 +23,7 @@ STOP_WORDS = {
     "a", "about", "an", "and", "are", "at", "did", "do", "does", "for", "has", "have", "he", "his",
     "how", "i", "in", "is", "it", "me", "my", "of", "on", "or", "the", "to", "was", "what", "when",
     "where", "which", "who", "with", "anamul", "hasan",
+    "you", "your", "yours", "yourself",  # Day 8: the bot speaks as Anamul, so visitors ask "you" and mean him
 }
 
 app = FastAPI(title="Anamul AI", description="Answers questions about Anamul Hasan, with sources.")
@@ -119,16 +123,22 @@ class AskResponse(BaseModel):  # The JSON the widget gets back
 def ask(request: AskRequest) -> AskResponse:
     """Answer a question about Anamul, with sources.
 
-    For now, the answer is the best-matching chunk. In Week 2, Claude will write
-    the answer from these same chunks, and this endpoint's shape stays the same.
+    Day 8: Claude writes the answer from the matching chunks. The request and
+    response shapes are the same as on Day 6, so the widget won't need to change.
     """
-    results = search(request.question, limit=3)  # Reuse Day 4's search; a route is still a normal function
+    results = search(request.question, limit=5)  # Reuse Day 4's search; a route is still a normal function
     if not results:
+        # No matching chunks means nothing to answer from, so don't spend money asking Claude
         return AskResponse(question=request.question, answer="I couldn't find anything about that yet.", sources=[])
+
+    try:
+        answer = write_answer(request.question, [result.chunk.text for result in results])
+    except anthropic.APIError:  # Claude busy, network down, rate limit...: tell the visitor kindly instead of crashing
+        raise HTTPException(status_code=503, detail="The answer service is busy right now. Please try again in a minute.")
 
     sources = []
     for result in results:
         source = Source(title=result.chunk.title, url=result.chunk.url, section=result.chunk.section)
         if source not in sources:  # Two chunks from the same section would be the same source; list it once
             sources.append(source)
-    return AskResponse(question=request.question, answer=results[0].chunk.text, sources=sources)
+    return AskResponse(question=request.question, answer=answer, sources=sources)
