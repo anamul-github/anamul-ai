@@ -17,7 +17,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 4: my first API with FastAPI, with a keyword search that showed why the bot needs to search by meaning
 - [x] Day 5: 8 automated tests with pytest for the chunker and the API
 - [x] Day 6: `POST /ask`, the endpoint the chat widget will call, which returns an answer with its sources (12 tests)
-- [ ] Rest of Week 1: Python and FastAPI
+- [x] Day 7: my first message to Claude through the API, with the key kept safely in `.env`
 - [ ] Week 2: Claude API, search with pgvector, and a set of test questions
 - [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
 - [ ] Week 4: chat widget on anamulhasan.com, a LangGraph agent, and launch
@@ -32,4 +32,6 @@ uv run python -m anamul_ai.resume ~/Desktop/Anamul-Hasan-Resume.pdf   # Day 3: r
 uv run python -m anamul_ai.chunk        # Day 3: split data/ into searchable chunks (data/chunks.jsonl)
 uv run fastapi dev src/anamul_ai/api.py # Day 4: the API; try it at http://127.0.0.1:8000/docs
 uv run pytest                           # Day 5: run the tests in tests/
+cp .env.example .env                    # Day 7: once, then put your Claude API key in .env (never commit it)
+uv run python learn/day07_hello_claude.py   # Day 7: first message to Claude
 ```

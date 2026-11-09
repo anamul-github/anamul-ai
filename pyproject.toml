@@ -8,9 +8,11 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "anthropic>=2.6.0",
     "fastapi[standard]>=0.162.0",
     "httpx>=0.28.1",
     "markdownify>=1.2.3",
+    "pydantic-settings>=2.16.2",
     "pypdf>=6.21.4",
 ]
 

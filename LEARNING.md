@@ -69,3 +69,16 @@
 **My answer (1):** `/search` is a GET because it only reads (looks up) chunks, with the question in the URL. `/ask` is a POST because the chat widget sends the visitor's question in the request body as JSON. The question goes to my API, and my API calls Claude, so my secret API key stays on my server, never in the browser.
 
 **My answer (2):** A question under 3 characters, like "hi", is too short to answer. The 300-character maximum keeps each question cheap once Claude answers it, and stops people from pasting huge text or misusing the bot. A real recruiter question easily fits.
+
+## Day 7 (Nov 9): My first message to Claude
+- I created a Claude API key at platform.claude.com. My Max plan includes $100 a month in API credits, and I added no card, so I can't be charged by accident. The key expires on Feb 16, 2027, and its scope can't change my account settings.
+- Secrets live in `.env`, which `.gitignore` keeps off GitHub. `.env.example` is committed and shows the format with a placeholder. `cp .env.example .env` replaces `.env` every time, so I run it only once.
+- `pydantic-settings`: `class Settings(BaseSettings)` fills its fields from `.env`. `SecretStr` prints `**********` instead of the key, and `.get_secret_value()` unwraps it only when it's needed.
+- `client.beta.messages.create(model=..., max_tokens=..., messages=[...])` sends a message. The reply is a list of blocks, and the answer is in the blocks with `type == "text"`.
+- `output_config={"effort": "low"}` keeps simple questions cheap. `fallbacks="default"` retries on another model if a safety check declines a request.
+- Friendly errors: catching `ValidationError` (missing key) and `anthropic.AuthenticationError` (wrong key) prints one clear line instead of a long traceback.
+- First hello: 41 tokens in, 155 out, $0.00326. That's about 30,000 questions like it for $100.
+
+**My answer (1):** My API key lives in `.env` because `.gitignore` keeps that file off GitHub, so nobody can see or steal the key and run up charges on my account. If a key is ever committed, deleting it later doesn't help, because it stays in the git history. `.env.example` shows which settings exist, without the real values.
+
+**My answer (2):** Tokens are the pieces of text (about ¾ of a word each) that Claude reads as input and writes as output. I pay for every token, and output costs 5 times more than input on Opus 5.5. That's why the bot sends only the few matching chunks, and why I'll limit how much each visitor can ask.
