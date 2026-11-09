@@ -1,16 +1,16 @@
-# Day 1: Python basics, explained for a JavaScript developer.
-# Run it with:  uv run python learn/day01_about_me.py
+# Day 1: my notes on Python basics, coming from JavaScript.
+# Run: uv run python learn/day01_about_me.py
 
-# --- Variables: no let/const, no semicolons. The type comes from the value. ---
+# Variables: no let/const or semicolons; the type comes from the value
 name = "Anamul Hasan"
 title = "full-stack software developer"
 school = "Georgia Tech"
 
-# --- Lists: like JavaScript arrays ---
+# Lists are like arrays
 skills = ["React", "Next.js", "TypeScript", "Node.js", "Express", "MongoDB", "Tailwind CSS"]
 learning = ["Python", "FastAPI", "RAG", "LangGraph", "AWS"]
 
-# --- Dictionaries: like JavaScript objects, but keys are in quotes ---
+# Dictionaries are like objects, with quoted keys
 degree = {
     "school": school,
     "program": "MS in Computer Science",
@@ -18,23 +18,18 @@ degree = {
     "graduating": 2027,
 }
 
-# --- f-strings: like JavaScript template literals (`Hi ${name}`) ---
+# f-strings are like template literals
 print(f"Hi, I am {name}, a {title}.")
 print(f"I am studying {degree['program']} at {degree['school']}, focused on {degree['focus']}.")
-
-# len() counts items, like skills.length in JavaScript
-# ", ".join(list) is like list.join(", ") in JavaScript
 print(f"I work with {len(skills)} main tools: {', '.join(skills)}")
 
-# --- Loops: no braces. The indented lines (4 spaces) are the loop body. ---
+# Indentation instead of { }
 for topic in learning:
     print(f"  Currently learning: {topic}")
 
 
-# --- Functions: 'def' instead of 'function', and a colon plus indentation instead of { } ---
 def describe(skill):
-    # if / elif / else, like if / else if / else in JavaScript
-    if skill in skills:          # 'in' checks whether a list contains it, like skills.includes(skill)
+    if skill in skills:  # `in` is like .includes()
         return f"{skill}: I use it in real projects"
     elif skill in learning:
         return f"{skill}: learning it this month"
@@ -42,6 +37,6 @@ def describe(skill):
         return f"{skill}: not yet"
 
 
-print()  # an empty line
+print()
 for skill in ["React", "Python", "Kotlin"]:
     print(describe(skill))

@@ -1,9 +1,4 @@
-"""Day 5: tests for chunk.py.
-
-pytest runs every function whose name starts with test_. Each `assert` is a check:
-if it's False, the test fails and pytest shows what went wrong.
-Run them with:  uv run pytest
-"""
+"""Tests for chunk.py."""
 
 from anamul_ai.chunk import MAX_WORDS, pack, split_front_matter, split_sections
 
@@ -25,7 +20,7 @@ def test_sections_keep_the_headings_above_them():
 
 
 def test_pack_never_goes_over_the_word_limit():
-    paragraphs = ["word " * 100] * 5  # Five paragraphs of 100 words each, like [..."word ".repeat(100)] in JavaScript
+    paragraphs = ["word " * 100] * 5  # Five paragraphs of 100 words each
     pieces = pack(paragraphs)
-    assert all(len(piece.split()) <= MAX_WORDS for piece in pieces)  # all() is like .every() in JavaScript
-    assert len(pieces) == 3  # 200 words + 200 words + 100 words
+    assert all(len(piece.split()) <= MAX_WORDS for piece in pieces)
+    assert len(pieces) == 3  # 200 + 200 + 100 words

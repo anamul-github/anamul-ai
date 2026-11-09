@@ -1,9 +1,7 @@
-"""Day 3: split everything in data/ into small chunks the chatbot can search.
+"""Split everything in data/ into small chunks for search, saved to data/chunks.jsonl.
 
-The bot can't send all of data/ to Claude with every question, so it will look up
-the few pieces that match the question. Those pieces are chunks: one section of a
-file, small enough to be about one thing, with its title and URL for citing.
-Run it with:  uv run python -m anamul_ai.chunk
+Each chunk is one section of a file, with its title and URL so answers can cite it.
+Run: uv run python -m anamul_ai.chunk
 """
 
 import json
@@ -14,10 +12,10 @@ from pathlib import Path
 DATA_DIR = Path("data")
 OUTPUT = DATA_DIR / "chunks.jsonl"
 MAX_WORDS = 250  # Big enough to keep a thought together, small enough to be about one thing
-HEADING = re.compile(r"^(#{1,6})\s+(.*)")  # A Markdown heading: 1 to 6 #'s, a space, then the text
+HEADING = re.compile(r"^(#{1,6})\s+(.*)")  # A Markdown heading line
 
 
-@dataclass  # Like a TypeScript interface that is also a class: fixed fields, and it writes __init__ for you
+@dataclass
 class Chunk:
     id: str
     title: str
@@ -28,8 +26,8 @@ class Chunk:
 
 
 def split_front_matter(text: str) -> tuple[dict, str]:
-    """Separate the --- header that collect.py wrote from the rest. Returns (metadata, body)."""
-    _, header, body = text.split("---\n", 2)  # At most 2 splits, so a --- later in the body is left alone
+    """Separate the --- header from the body. Returns (metadata, body)."""
+    _, header, body = text.split("---\n", 2)  # At most 2 splits, so a --- inside the body stays put
     meta = {}
     for line in header.splitlines():
         key, _, value = line.partition(": ")
@@ -40,22 +38,21 @@ def split_front_matter(text: str) -> tuple[dict, str]:
 def split_sections(body: str) -> list[tuple[str, str]]:
     """Split Markdown at its headings. Returns (heading path, text) pairs.
 
-    The heading path is every heading above the text, like "Work experience > DevOps Engineer",
-    so a chunk still makes sense when it's read on its own.
+    The heading path, like "Work experience > DevOps Engineer", keeps each chunk understandable on its own.
     """
     sections = []
-    headings = {}  # Heading level -> heading text, for the headings above the current line
+    headings = {}  # Heading level -> text, for the headings above the current line
     lines = []
     for line in body.splitlines():
         match = HEADING.match(line)
         if not match:
             lines.append(line)
             continue
-        sections.append((" > ".join(headings.values()), "\n".join(lines)))  # Save the section that just ended
+        sections.append((" > ".join(headings.values()), "\n".join(lines)))  # Close the section that just ended
         level, text = len(match[1]), match[2].strip().rstrip(":")
-        # A new heading replaces any heading at its level or deeper, like a new chapter ends the old sections
+        # A new heading replaces any heading at its level or deeper
         headings = {lvl: heading for lvl, heading in headings.items() if lvl < level}
-        if level > 1:  # Level 1 is the page title, which every chunk already has
+        if level > 1:  # Level 1 is the page title, already in every chunk
             headings[level] = text
         lines = []
     sections.append((" > ".join(headings.values()), "\n".join(lines)))
@@ -63,7 +60,7 @@ def split_sections(body: str) -> list[tuple[str, str]]:
 
 
 def pack(paragraphs: list[str]) -> list[str]:
-    """Group paragraphs into pieces of at most MAX_WORDS words, without cutting a paragraph in half."""
+    """Group paragraphs into pieces of at most MAX_WORDS words, without splitting a paragraph."""
     pieces, current = [], []
     for paragraph in paragraphs:
         if current and len(" ".join(current + [paragraph]).split()) > MAX_WORDS:
@@ -88,7 +85,7 @@ def chunk_file(file: Path) -> list[Chunk]:
                 type=meta["type"],
                 url=meta["url"],
                 section=section,
-                text=f"{where}\n\n{piece}",  # Starts with where it came from, so the search and Claude both see it
+                text=f"{where}\n\n{piece}",  # Starts with where it came from, so search and Claude both see it
             ))
     print(f"  {file}: {len(chunks)} chunks")
     return chunks
@@ -96,11 +93,10 @@ def chunk_file(file: Path) -> list[Chunk]:
 
 def main() -> None:
     chunks = []
-    for file in sorted(DATA_DIR.rglob("*.md")):  # rglob searches every folder inside data/
+    for file in sorted(DATA_DIR.rglob("*.md")):
         chunks += chunk_file(file)
 
-    # JSON Lines: one JSON object per line, so later steps can read it one chunk at a time
-    with OUTPUT.open("w", encoding="utf-8") as out:  # "with" closes the file when the block ends
+    with OUTPUT.open("w", encoding="utf-8") as out:  # JSON Lines: one chunk per line
         for chunk in chunks:
             out.write(json.dumps(asdict(chunk), ensure_ascii=False) + "\n")
 

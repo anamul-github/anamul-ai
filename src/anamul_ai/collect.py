@@ -1,31 +1,26 @@
-"""Day 2: collect Anamul's articles and book notes from anamulhasan.com.
+"""Download my articles and book notes from anamulhasan.com and save them as Markdown in data/.
 
-Saves each one as a Markdown file in data/, which the chatbot will later search.
-Run it with:  uv run python -m anamul_ai.collect
+Run: uv run python -m anamul_ai.collect
 """
 
-from pathlib import Path  # Path builds file paths, like Node's path module
+from pathlib import Path
 
-import httpx  # Makes HTTP requests, like fetch() or axios in JavaScript
-from markdownify import markdownify  # Turns HTML into Markdown text
+import httpx
+from markdownify import markdownify
 
 SITE = "https://www.anamulhasan.com"
 DATA_DIR = Path("data")
 
 
 def get_json(path: str):
-    """Fetch a URL from the site's API and return the parsed JSON.
-
-    `path: str` is a type hint, like TypeScript's (path: string). Python doesn't
-    enforce it at runtime, but editors and tools use it to catch mistakes.
-    """
+    """GET a path from my site's API and return the parsed JSON."""
     response = httpx.get(f"{SITE}{path}", timeout=30)
-    response.raise_for_status()  # Stops with an error on a 404 or 500, instead of carrying on silently
+    response.raise_for_status()  # Fail loudly on a 404 or 500 instead of saving an error page
     return response.json()
 
 
 def to_markdown(html: str) -> str:
-    """Convert the HTML that the site's editor saves into clean Markdown."""
+    """Convert the HTML that my site's editor saves into clean Markdown."""
     return markdownify(html, heading_style="ATX", strip=["img", "span"]).strip()
 
 
@@ -48,7 +43,6 @@ def book_note_to_markdown(note: dict) -> str:
         f"# {note['title']} by {note['bookAuthor']}",
         f"My rating: {note['rating']}/10. Read in {note['dateRead']}. Topics: {note['topics']}",
         "## The book in 3 sentences",
-        # A list comprehension: like note.bookIn3Sentences.map(s => `- ${s}`) in JavaScript
         "\n".join(f"- {sentence}" for sentence in note["bookIn3Sentences"]),
         "## My impressions",
         note["impressions"],
@@ -59,17 +53,16 @@ def book_note_to_markdown(note: dict) -> str:
         "## My favorite quotes",
     ]
     for quote in note["topQuotes"]:
-        # A quote may start with a heading line: "On overcoming fear\nThere is only one thing..."
+        # Some quotes start with a heading line, like "On overcoming fear\nThere is only one thing..."
         heading, _, text = quote.partition("\n")
         parts.append(f"> {text}\n\n({heading})" if text else f"> {heading}")
-    # .get() returns "" instead of crashing when a note has no notes yet, like note.notes ?? "" in JavaScript
-    parts += ["## My notes", to_markdown(note.get("notes", ""))]
+    parts += ["## My notes", to_markdown(note.get("notes", ""))]  # Some notes don't have this section yet
     return "\n\n".join(parts)
 
 
 def save(folder: str, slug: str, text: str) -> None:
-    path = DATA_DIR / folder / f"{slug}.md"  # The / operator joins paths
-    path.parent.mkdir(parents=True, exist_ok=True)  # Like mkdir -p
+    path = DATA_DIR / folder / f"{slug}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text + "\n", encoding="utf-8")
     print(f"  saved {path} ({len(text.split())} words)")
 
@@ -81,11 +74,10 @@ def main() -> None:
 
     print("Book notes:")
     for summary in get_json("/api/book-notes"):
-        # The list leaves out the long notes, so fetch each full book note by its slug
+        # The list endpoint leaves out the long fields, so fetch each full note by its slug
         note = get_json(f"/api/book-notes/{summary['slug']}")
         save("book-notes", note["slug"], book_note_to_markdown(note))
 
 
-# Runs main() only when this file is run directly, not when another file imports it
 if __name__ == "__main__":
     main()
