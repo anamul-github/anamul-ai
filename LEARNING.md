@@ -70,7 +70,7 @@
 
 **My answer (2):** A question under 3 characters, like "hi", is too short to answer. The 300-character maximum keeps each question cheap once Claude answers it, and stops people from pasting huge text or misusing the bot. A real recruiter question easily fits.
 
-## Day 7 (Nov 9): My first message to Claude
+## Day 7 (Nov 8): My first message to Claude
 - I created a Claude API key at platform.claude.com. My Max plan includes $100 a month in API credits, and I added no card, so I can't be charged by accident. The key expires on Feb 16, 2027, and its scope can't change my account settings.
 - Secrets live in `.env`, which `.gitignore` keeps off GitHub. `.env.example` is committed and shows the format with a placeholder. `cp .env.example .env` replaces `.env` every time, so I run it only once.
 - `pydantic-settings`: `class Settings(BaseSettings)` fills its fields from `.env`. `SecretStr` prints `**********` instead of the key, and `.get_secret_value()` unwraps it only when it's needed.
