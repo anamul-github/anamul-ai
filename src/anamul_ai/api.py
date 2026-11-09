@@ -11,10 +11,12 @@ import re
 from pathlib import Path
 
 import anthropic
+import voyageai
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field  # Pydantic checks that data has the right fields and types
 
 from anamul_ai.answer import write_answer
+from anamul_ai.embed import embed_query, load_embeddings, similarity
 
 CHUNKS_FILE = Path("data/chunks.jsonl")
 WORD = re.compile(r"[a-z0-9]+")
@@ -39,7 +41,7 @@ class Chunk(BaseModel):  # Like Day 3's dataclass, but FastAPI also uses it to c
 
 
 class SearchResult(BaseModel):
-    score: int  # How many of the question's words this chunk contains
+    score: float  # Keyword search: how many words matched. Meaning search: similarity, from 0 to 1.
     chunk: Chunk
 
 
@@ -57,6 +59,7 @@ def words(text: str) -> set[str]:
 
 
 CHUNKS = load_chunks()  # Read once when the server starts, not on every request
+VECTORS = load_embeddings()  # Day 9: chunk id -> meaning fingerprint ({} until embed.py has run)
 
 
 @app.get("/")  # A decorator: like app.get("/", handler) in Express, written above the function
@@ -87,7 +90,7 @@ def search(q: str, limit: int = 5) -> list[SearchResult]:
     """Find the chunks that share the most words with the question.
 
     Keyword search only matches exact words, so "leader" won't find "led".
-    In Week 2, embeddings will search by meaning instead.
+    Day 9: /search/meaning searches by meaning instead.
     """
     question = words(q)
     results = []
@@ -97,6 +100,31 @@ def search(q: str, limit: int = 5) -> list[SearchResult]:
             results.append(SearchResult(score=score, chunk=chunk))
     results.sort(key=lambda result: result.score, reverse=True)  # Highest score first, like .sort((a, b) => b.score - a.score)
     return results[:limit]  # The first `limit` results, like .slice(0, limit)
+
+
+@app.get("/search/meaning")
+def meaning_search(q: str, limit: int = 5) -> list[SearchResult]:
+    """Day 9: find the chunks whose meaning is closest to the question, even with no shared words."""
+    question = embed_query(q)  # The question's fingerprint, from Voyage
+    results = [
+        SearchResult(score=round(similarity(question, VECTORS[chunk.id]), 3), chunk=chunk)
+        for chunk in CHUNKS
+        if chunk.id in VECTORS
+    ]
+    results.sort(key=lambda result: result.score, reverse=True)
+    return results[:limit]
+
+
+# Day 9, measured: real questions scored 0.29 or more, while "xylophone zebra" scored only 0.13
+MIN_SIMILARITY = 0.2
+
+
+def find_chunks(question: str, limit: int = 5) -> list[SearchResult]:
+    """Search by meaning once the fingerprints exist; until then, fall back to keyword search."""
+    if VECTORS:
+        # Meaning search always returns something, so drop chunks that aren't really close
+        return [result for result in meaning_search(question, limit) if result.score >= MIN_SIMILARITY]
+    return search(question, limit)
 
 
 # --- Day 6: the endpoint the chat widget will call ---
@@ -126,14 +154,13 @@ def ask(request: AskRequest) -> AskResponse:
     Day 8: Claude writes the answer from the matching chunks. The request and
     response shapes are the same as on Day 6, so the widget won't need to change.
     """
-    results = search(request.question, limit=5)  # Reuse Day 4's search; a route is still a normal function
-    if not results:
-        # No matching chunks means nothing to answer from, so don't spend money asking Claude
-        return AskResponse(question=request.question, answer="I couldn't find anything about that yet.", sources=[])
-
     try:
+        results = find_chunks(request.question)  # Day 9: by meaning (Voyage), not just matching words
+        if not results:
+            # No matching chunks means nothing to answer from, so don't spend money asking Claude
+            return AskResponse(question=request.question, answer="I couldn't find anything about that yet.", sources=[])
         answer = write_answer(request.question, [result.chunk.text for result in results])
-    except anthropic.APIError:  # Claude busy, network down, rate limit...: tell the visitor kindly instead of crashing
+    except (anthropic.APIError, voyageai.error.VoyageError):  # Claude or Voyage busy, network down...: reply kindly
         raise HTTPException(status_code=503, detail="The answer service is busy right now. Please try again in a minute.")
 
     sources = []

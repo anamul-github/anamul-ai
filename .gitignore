@@ -18,3 +18,6 @@ wheels/
 
 # Built by chunk.py; rebuild it any time with: uv run python -m anamul_ai.chunk
 data/chunks.jsonl
+
+# Built by embed.py; rebuild it with: uv run python -m anamul_ai.embed
+data/embeddings.json

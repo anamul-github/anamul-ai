@@ -6,7 +6,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 ## How it works
 1. **Collect:** my articles, book notes, resume, About page and projects are saved as Markdown in `data/`.
 2. **Chunk:** everything is split into small sections, each labeled with where it came from (like *Resume > Work experience > DevOps Engineer*).
-3. **Search:** find the chunks that match a question. Keyword search for now; search by meaning, using embeddings in PostgreSQL + pgvector, is coming in Week 2.
+3. **Search:** find the chunks closest in meaning to the question, using embeddings (meaning fingerprints) from Voyage AI. They're in a local file for now; PostgreSQL + pgvector is next.
 4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and returns its sources.
 5. **Ship** *(coming in Weeks 3–4)*: an API on AWS and a chat widget on [anamulhasan.com](https://www.anamulhasan.com).
 
@@ -19,6 +19,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 6: `POST /ask`, the endpoint the chat widget will call, which returns an answer with its sources (12 tests)
 - [x] Day 7: my first message to Claude through the API, with the key kept safely in `.env`
 - [x] Day 8: Claude writes the answers in `/ask`, in my voice, using only the matching chunks (14 tests)
+- [x] Day 9: search by meaning with Voyage AI embeddings, so "Tell me about yourself?" now finds my About page (19 tests)
 - [ ] Week 2: Claude API, search with pgvector, and a set of test questions
 - [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
 - [ ] Week 4: chat widget on anamulhasan.com, a LangGraph agent, and launch
@@ -35,4 +36,5 @@ uv run fastapi dev src/anamul_ai/api.py # Day 4: the API; try it at http://127.0
 uv run pytest                           # Day 5: run the tests in tests/
 cp .env.example .env                    # Day 7: once, then put your Claude API key in .env (never commit it)
 uv run python learn/day07_hello_claude.py   # Day 7: first message to Claude
+uv run python -m anamul_ai.embed        # Day 9: meaning fingerprints for every chunk (needs VOYAGE_API_KEY in .env)
 ```

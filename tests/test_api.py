@@ -13,6 +13,12 @@ from anamul_ai.api import app
 client = TestClient(app)  # Like a fake browser that sends requests straight to the app
 
 
+@pytest.fixture(autouse=True)  # autouse: every test in this file gets it, without asking for it
+def no_voyage(monkeypatch):
+    """Day 9: tests never call Voyage. With no fingerprints loaded, /ask falls back to keyword search."""
+    monkeypatch.setattr("anamul_ai.api.VECTORS", {})
+
+
 @pytest.fixture  # A fixture is setup that a test asks for by naming it as a parameter
 def fake_claude(monkeypatch):
     """Day 8: swap the real Claude call for a fake one, so tests are free, fast and need no API key.
@@ -93,3 +99,21 @@ def test_ask_says_so_when_nothing_matches(fake_claude):
     body = client.post("/ask", json={"question": "xylophone zebra"}).json()
     assert body["sources"] == []
     assert fake_claude == []  # Nothing to answer from, so Claude wasn't asked (and nothing was spent)
+
+
+# --- Day 9: search by meaning ---
+
+def test_meaning_search_puts_the_closest_meaning_first(monkeypatch):
+    # Tiny made-up fingerprints with 2 numbers instead of 1,024, and a fake Voyage
+    monkeypatch.setattr("anamul_ai.api.VECTORS", {"resume-3": [1.0, 0.0], "about-3": [0.0, 1.0]})
+    monkeypatch.setattr("anamul_ai.api.embed_query", lambda text: [0.9, 0.1])  # lambda: a one-line function, like text => [0.9, 0.1]
+    results = client.get("/search/meaning", params={"q": "anything"}).json()
+    assert [result["chunk"]["id"] for result in results] == ["resume-3", "about-3"]  # [0.9, 0.1] points almost the same way as [1, 0]
+
+
+def test_ask_skips_claude_when_nothing_is_close_in_meaning(monkeypatch, fake_claude):
+    monkeypatch.setattr("anamul_ai.api.VECTORS", {"resume-3": [1.0, 0.0]})
+    monkeypatch.setattr("anamul_ai.api.embed_query", lambda text: [0.0, 1.0])  # At a right angle: similarity 0
+    body = client.post("/ask", json={"question": "xylophone zebra"}).json()
+    assert body["sources"] == []
+    assert fake_claude == []  # Below MIN_SIMILARITY, so Claude wasn't asked

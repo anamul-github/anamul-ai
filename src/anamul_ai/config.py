@@ -17,6 +17,8 @@ class Settings(BaseSettings):  # Like a Pydantic model, but it fills its fields 
     anthropic_api_key: SecretStr
     # Day 8: the model that writes the answers. To switch, add CLAUDE_MODEL=... to .env.
     claude_model: str = "claude-opus-5-5"
+    # Day 9: Voyage AI makes the meaning fingerprints (embeddings) for search by meaning
+    voyage_api_key: SecretStr
 
     model_config = SettingsConfigDict(env_file=".env")
 

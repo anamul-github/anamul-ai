@@ -97,3 +97,19 @@
 **My answer (1):** The system prompt is Claude's standing instructions: who it is (me, speaking in the first person), how to answer (short and humble), and the rules. "Use only the sources" means Claude answers only from the chunks search found, without guessing. When the chunks didn't cover "What are you good at?", it said so instead of making up skills.
 
 **My answer (2):** The tests check my code, not Claude, so they use a fake Claude. The real one would cost money on every test run, take seconds per answer, need my API key (which must never be on GitHub), and word its answer differently each time. The fake is free, instant and always gives the same answer.
+
+## Day 9 (Nov 9): Search by meaning
+- An embedding is a "meaning fingerprint": a list of 1,024 numbers that captures what a text means. Voyage AI's `voyage-4` model made one for each of my 87 chunks (13,765 tokens, covered by free tokens). `embed.py` saves them in `data/embeddings.json`, which isn't committed because it can always be rebuilt.
+- Chunks are embedded with `input_type="document"` and questions with `input_type="query"`.
+- Cosine similarity compares two fingerprints: 1 means the same meaning, 0 unrelated, -1 opposite. `similarity()` uses `zip`, `sum` and `math.sqrt`, and the tests use `pytest.approx` because decimals can be off by a tiny bit.
+- Without a payment method, Voyage allows only 3 requests and 10,000 tokens per minute. My first run failed after 30 chunks, so the script now pauses 60 seconds between batches. Until I add a card (the free tokens still apply), the bot can answer about 3 questions a minute.
+- `MIN_SIMILARITY = 0.2`, chosen by measuring: real questions scored 0.29 or more, and "xylophone zebra" only 0.13. Meaning search always returns something, so `/ask` drops chunks under 0.2 and skips Claude when nothing is left.
+- `GET /search/meaning` shows the closest chunks and their scores. `/ask` now searches by meaning, and falls back to keyword search if the fingerprints don't exist yet.
+- Before and after: "Tell me about yourself?" went from nothing to a full introduction from my About page. "What do you like to do for fun?" and "Does he know cloud and DevOps?" now find the right chunks. "Are you a good leader?" still misses my resume (rank 49 of 87).
+- More tests in the browser: it refused to write a cat poem (prompt injection), said it's an AI when asked if it's the real me, didn't know my phone number (removed on Day 3), and was honest that Kubernetes isn't in my background.
+- Problems found: "Why should we hire you?" said "I work full time" (from an older article) and left out my technical skills. The weakness answer used a self-doubt story I may not want recruiters to see.
+- 19 tests, all passing without any API keys.
+
+**My answer (1):** An embedding is a "meaning fingerprint": a list of 1,024 numbers that represents what a text means. Meaning search turns the question into a fingerprint and finds the chunks with the closest fingerprints. "Tell me about yourself?" shares no important words with my About page, but their meanings are close, so meaning search found it when keyword search found nothing.
+
+**My answer (2):** Each chunk gets one fingerprint for its whole text. My OATI DevOps chunk is mostly about infrastructure (Ansible, CI/CD, servers), and only 2 of its 8 bullets are about leading, so its fingerprint means "DevOps work" and the leadership gets drowned out, like strawberries in a banana smoothie. Smaller chunks would give leadership its own fingerprint.
