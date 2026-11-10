@@ -107,7 +107,7 @@
 - `GET /search/meaning` shows the closest chunks and their scores. `/ask` now searches by meaning, and falls back to keyword search if the fingerprints don't exist yet.
 - Before and after: "Tell me about yourself?" went from nothing to a full introduction from my About page. "What do you like to do for fun?" and "Does he know cloud and DevOps?" now find the right chunks. "Are you a good leader?" still misses my resume (rank 49 of 87).
 - More tests in the browser: it refused to write a cat poem (prompt injection), said it's an AI when asked if it's the real me, didn't know my phone number (removed on Day 3), and was honest that Kubernetes isn't in my background.
-- Problems found: "Why should we hire you?" said "I work full time" (from an older article) and left out my technical skills. The weakness answer used a self-doubt story I may not want recruiters to see.
+- Problems found: "Why should we hire you?" said "I work full time" (from an older article, so it's out of date) and left out my technical skills. The weakness answer used a self-doubt story I may not want recruiters to see.
 - 19 tests, all passing without any API keys.
 
 **My answer (1):** An embedding is a "meaning fingerprint": a list of 1,024 numbers that represents what a text means. Meaning search turns the question into a fingerprint and finds the chunks with the closest fingerprints. "Tell me about yourself?" shares no important words with my About page, but their meanings are close, so meaning search found it when keyword search found nothing.
@@ -125,3 +125,17 @@
 **My answer (1):** CORS is a browser safety rule: a web page may only call APIs at its own address unless the API says the page is allowed. My website and my bot run at different addresses, so the bot's CORS middleware allows only my site (plus its previews and local development). Other sites can't use my bot from a browser. My Express backend's `cors` package does the same job for my articles.
 
 **My answer (2):** `src/layout/Main.jsx` wraps every page and stays on screen while I navigate. If the bubble and the chat page each kept their own state, the conversation would be lost when switching between them. So the conversation lives in a Provider (React Context) in the layout, "lifting state up", and both read the same conversation.
+
+## Day 11 (Nov 9): My detailed profile, by interview
+- The bot's answers can only be as good as its data, and my resume was too short and formal. So Claude interviewed me in 4 batches (my story, my work in depth, skills and how I work, goals and fun) and wrote `data/profile/about-me.md` in my voice. I approved every section.
+- The profile has one topic per heading, phrased like a visitor's question ("Have I held leadership roles?", "Why should you hire me?", "Do I need visa sponsorship?"), so search finds exactly the right section.
+- It includes my story, both OATI roles, teamwork, leadership (president of the Mankato Cricket Club and Badminton Club MNSU), years of experience per skill, strengths, my real weakness, where I do my best work, why AI and Python, nutrition coaching, chess and cricket, and answers for salary, relocation and sponsorship.
+- Privacy: the bot's copy of my resume has no dates for past jobs (`remove_past_dates()` in `resume.py`), and the bot never says when a job ended.
+- Experience: the bot says "7+ years building software, counting my studies and personal projects", and only mentions how long I worked at a company when someone asks about it.
+- The bot's instructions: it's "Anamul AI", it can do friendly small talk (and "hi" works now), facts about me come only from my data, articles are past writing, and when it doesn't know something it suggests a coffee chat.
+- Before and after: "Are you a good leader?", "What's your biggest weakness?", "Why should we hire you?" and "hi" all went from wrong or missing to good answers.
+- Mistakes I caught: a code comment and a test used my real job dates as examples, and a new test called the real Claude because it didn't use the fake. Fixed all three.
+
+**My answer (1):** A resume doesn't have the answers to most of what people ask, and its wording is formal and generic. My detailed profile covers my story, leadership, strengths, weakness, goals and fun facts in my own words, one topic per section. Search finds exactly the right section, and the answers sound like me.
+
+**My answer (2):** The bot finds answers in its data, so it can only say what's there. A rule like "don't mention it" is a request that could slip, but if the end date isn't in the data, the bot can't reveal it at all, like my phone number. We use both, the removed data and the rule: defense in depth.

@@ -13,7 +13,7 @@ Minneapolis, MN | U.S. Citizen | anamul.jobhunt@gmail.com
 
 ## Summary
 
-Software Engineer with 3+ years of experience building and supporting enterprise web applications across frontend,
+Software Engineer with 7+ years of experience building software, including professional work building and supporting enterprise web applications across frontend,
 backend, database, and DevOps environments. Skilled in React, TypeScript, JavaScript, C#, Node.js, SQL Server, REST
 APIs, and modern CI/CD practices using Docker and Ansible. Proven track record of improving application performance
 and deployment efficiency, including a 70% UI performance improvement and 18% reduction in deployment time.

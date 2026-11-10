@@ -21,9 +21,10 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 8: Claude writes the answers in `/ask`, in my voice, using only the matching chunks (14 tests)
 - [x] Day 9: search by meaning with Voyage AI embeddings, so "Tell me about yourself?" now finds my About page (19 tests)
 - [x] Day 10: "Anamul AI" on my website: a chat page and a floating bubble, talking to this API (CORS, 21 tests)
-- [ ] Week 2: Claude API, search with pgvector, and a set of test questions
-- [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
-- [ ] Week 4: chat widget on anamulhasan.com, a LangGraph agent, and launch
+- [x] Day 11: a detailed profile in my own words, written from an interview, so the bot knows me much better (24 tests)
+- [ ] Days 12–13: deploy to AWS (Docker + Lambda) and launch the beta on anamulhasan.com
+- [ ] Nov 15–21: learn from real questions (logs and feedback), an eval score, pgvector, Terraform, GitHub Actions
+- [ ] Nov 22–30: follow-up questions, a LangGraph agent, streaming answers, and v1.0
 
 What I learned each day is in [LEARNING.md](LEARNING.md).
 

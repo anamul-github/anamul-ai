@@ -16,6 +16,11 @@ OUTPUT = Path("data/profile/resume.md")
 SECTIONS = {"SUMMARY", "WORK EXPERIENCE", "SKILL HIGHLIGHTS", "CERTIFICATIONS", "EDUCATION"}
 PHONE = re.compile(r"\(?\d{3}\)?[\s.-]*\d{3}[\s.-]+\d{4}")  # (555) 123-4567, 555-123-4567 or 555.123.4567
 LINK_LABELS = {"LinkedIn", "GitHub", "Website"}  # Clickable in the PDF, but only the bare word survives as text
+# A finished date range like "Jan 2020 - Jun 2022", with the separator before it; "Present" ranges don't match
+DATE_RANGE = re.compile(r"\s*[—|]?\s*[A-Z][a-z]+ \d{4}\s*[-–]\s*[A-Z][a-z]+ \d{4}")
+# The PDF's summary counts professional years only; the bot describes total years, the way my profile does
+SUMMARY_FROM = "with 3+ years of experience building and supporting enterprise web applications"
+SUMMARY_TO = "with 7+ years of experience building software, including professional work building and supporting enterprise web applications"
 
 
 def pdf_lines(path: Path) -> list[str]:
@@ -36,11 +41,16 @@ def remove_private(line: str) -> str:
     return " | ".join(part for part in parts if not PHONE.search(part) and part not in LINK_LABELS)
 
 
+def remove_past_dates(line: str) -> str:
+    """Drop finished date ranges from a job line. My profile covers years of experience instead."""
+    return DATE_RANGE.sub("", line).strip()
+
+
 def to_markdown(lines: list[str]) -> str:
     out = []
     section = ""
     for line in lines:
-        line = remove_private(line)
+        line = remove_private(line).replace(SUMMARY_FROM, SUMMARY_TO)
         if line in SECTIONS:
             section = line
             out += ["", f"## {line.capitalize()}", ""]  # "WORK EXPERIENCE" -> "## Work experience"
@@ -51,7 +61,7 @@ def to_markdown(lines: list[str]) -> str:
         elif section == "WORK EXPERIENCE" and re.search(r"\d{4}", line):
             # A line with a year is either a company line (has "|") or a job title line
             level = "###" if "|" in line else "####"
-            out += ["", f"{level} {line}", ""]
+            out += ["", f"{level} {remove_past_dates(line)}", ""]
         else:
             out.append(line)
     return re.sub(r"\n{3,}", "\n\n", "\n".join(out))  # Two headings in a row leave extra blank lines

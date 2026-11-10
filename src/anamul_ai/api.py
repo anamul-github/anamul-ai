@@ -139,8 +139,8 @@ def find_chunks(question: str, limit: int = 5) -> list[SearchResult]:
 # --- The endpoint the chat widget calls ---
 
 class AskRequest(BaseModel):
-    # Too short can't be answered; too long costs more per question and invites misuse
-    question: str = Field(min_length=3, max_length=300)
+    # At least 2 characters, so "hi" works; too long costs more per question and invites misuse
+    question: str = Field(min_length=2, max_length=300)
 
 
 class Source(BaseModel):  # Where an answer came from, so the widget can link to it
@@ -160,9 +160,7 @@ def ask(request: AskRequest) -> AskResponse:
     """Answer a question about me with Claude, using only the closest chunks, and return the sources."""
     try:
         results = find_chunks(request.question)
-        if not results:
-            # Nothing to answer from, so skip the Claude call and its cost
-            return AskResponse(question=request.question, answer="I couldn't find anything about that yet.", sources=[])
+        # With no close chunks, Claude can still greet or chat, but the system prompt stops it from stating facts
         answer = write_answer(request.question, [result.chunk.text for result in results])
     except (anthropic.APIError, voyageai.error.VoyageError):
         # Claude or Voyage is down or rate-limited: a polite 503 instead of a crash
