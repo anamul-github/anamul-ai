@@ -3,7 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from anamul_ai.api import app
+from anamul_ai.api import MAX_QUESTIONS_PER_HOUR, app, recent_questions
 
 client = TestClient(app)
 
@@ -12,6 +12,12 @@ client = TestClient(app)
 def no_voyage(monkeypatch):
     """Never call Voyage in tests: with no embeddings loaded, /ask uses keyword search."""
     monkeypatch.setattr("anamul_ai.api.VECTORS", {})
+
+
+@pytest.fixture(autouse=True)
+def fresh_rate_limit():
+    """Each test starts with no questions counted, so tests don't use up each other's limit."""
+    recent_questions.clear()
 
 
 @pytest.fixture
@@ -123,3 +129,13 @@ def test_my_website_may_call_the_api():
 def test_other_websites_may_not():
     response = client.get("/", headers={"Origin": "https://example.com"})
     assert "access-control-allow-origin" not in response.headers
+
+
+# --- Question limit per visitor ---
+
+def test_a_visitor_is_limited_after_too_many_questions(fake_claude):
+    for _ in range(MAX_QUESTIONS_PER_HOUR):
+        assert client.post("/ask", json={"question": "hi"}).status_code == 200
+    response = client.post("/ask", json={"question": "hi"})
+    assert response.status_code == 429
+    assert len(fake_claude) == MAX_QUESTIONS_PER_HOUR  # The extra question never reached Claude

@@ -5,11 +5,13 @@ Run: uv run fastapi dev src/anamul_ai/api.py, then open http://127.0.0.1:8000/do
 
 import json
 import re
+import time
+from collections import defaultdict, deque
 from pathlib import Path
 
 import anthropic
 import voyageai
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -25,6 +27,9 @@ STOP_WORDS = {
     "where", "which", "who", "with", "anamul", "hasan",
     "you", "your", "yours", "yourself",  # The bot speaks as me, so "you" means me
 }
+# Keeps one visitor from running up my Claude bill. Counted per running server, which is enough for the beta.
+MAX_QUESTIONS_PER_HOUR = 20
+recent_questions: dict[str, deque] = defaultdict(deque)  # Visitor's IP address -> times of their questions
 
 app = FastAPI(title="Anamul AI", description="Answers questions about Anamul Hasan, with sources.")
 
@@ -155,9 +160,21 @@ class AskResponse(BaseModel):
     sources: list[Source]
 
 
+def check_rate_limit(visitor: str) -> None:
+    """Allow MAX_QUESTIONS_PER_HOUR questions per visitor in any rolling hour, then answer 429."""
+    now = time.time()
+    times = recent_questions[visitor]
+    while times and now - times[0] > 3600:  # Forget questions older than an hour
+        times.popleft()
+    if len(times) >= MAX_QUESTIONS_PER_HOUR:
+        raise HTTPException(status_code=429, detail="You've asked a lot of questions! Please try again in a little while.")
+    times.append(now)
+
+
 @app.post("/ask")
-def ask(request: AskRequest) -> AskResponse:
+def ask(request: AskRequest, http: Request) -> AskResponse:
     """Answer a question about me with Claude, using only the closest chunks, and return the sources."""
+    check_rate_limit(http.client.host if http.client else "unknown")
     try:
         results = find_chunks(request.question)
         # With no close chunks, Claude can still greet or chat, but the system prompt stops it from stating facts

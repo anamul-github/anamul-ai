@@ -139,3 +139,18 @@
 **My answer (1):** A resume doesn't have the answers to most of what people ask, and its wording is formal and generic. My detailed profile covers my story, leadership, strengths, weakness, goals and fun facts in my own words, one topic per section. Search finds exactly the right section, and the answers sound like me.
 
 **My answer (2):** The bot finds answers in its data, so it can only say what's there. A rule like "don't mention it" is a request that could slip, but if the end date isn't in the data, the bot can't reveal it at all, like my phone number. We use both, the removed data and the rule: defense in depth.
+
+## Day 12 (Nov 9): Live on AWS
+- A question limit per visitor: 20 questions per hour per IP address. Question 21 gets a 429 ("You've asked a lot of questions!") and never reaches Claude, so nobody can run up my bill. Counted per running server, which is enough for the beta. 25 tests.
+- Docker: the `Dockerfile` starts from AWS's Lambda Python 3.13 image, installs only the packages the bot needs (from `uv.lock`, no pytest), and copies in my code, chunks and embeddings. `.dockerignore` keeps `.env` out, and I checked that the image has no `.env` inside.
+- Mangum connects AWS Lambda to FastAPI (`lambda_handler.py`). I tested the image locally the way Lambda runs it before deploying.
+- On AWS (us-east-2): an ECR repository for the image, an IAM role that only lets Lambda run and write logs, the Lambda function (arm64, 1 GB, 60-second timeout), and a public Function URL.
+- My keys: `scripts/set_lambda_keys.sh` copies them from `.env` into Lambda's settings (encrypted by AWS) and never prints them.
+- `scripts/deploy.sh` rebuilds the image, pushes it, and updates Lambda with one command.
+- First live answer from AWS: "Tell me about yourself" in about 6.6 seconds, including the cold start.
+- I added a payment method on Voyage (my billing details first), so the live bot isn't stuck at 3 questions a minute. The free tokens still apply.
+- Small lessons: in zsh, `$REPO:latest` is read as a special modifier, so write `${REPO}:latest`. A brand-new IAM role takes a few seconds before Lambda can use it.
+
+**My answer (1):** A Docker image is a sealed box with everything my bot needs to run: Python, its packages, my code, and my chunks and embeddings. It runs the same on AWS as on my laptop, so there are no "it works on my machine" surprises. AWS Lambda runs my bot straight from that image.
+
+**My answer (2):** The image gets copied to ECR, and anyone with a copy could open it, so secrets must never be inside it (`.dockerignore` keeps `.env` out). My keys live in Lambda's settings instead: encrypted by AWS, separate from the code, and easy to change without rebuilding, like Vercel's environment variables for my website.

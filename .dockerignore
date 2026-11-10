@@ -1,0 +1,9 @@
+# Never send secrets or local clutter into the image
+.env
+.venv
+.git
+.pytest_cache
+__pycache__
+*.pyc
+tests
+learn
