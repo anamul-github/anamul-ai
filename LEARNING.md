@@ -155,7 +155,7 @@
 
 **My answer (2):** The image gets copied to ECR, and anyone with a copy could open it, so secrets must never be inside it (`.dockerignore` keeps `.env` out). My keys live in Lambda's settings instead: encrypted by AWS, separate from the code, and easy to change without rebuilding, like Vercel's environment variables for my website.
 
-## Day 13 (Nov 9): The beta is live on anamulhasan.com
+## Day 13 (Nov 10): The beta is live on anamulhasan.com
 - My website now talks to the bot on AWS. In Vercel I added `VITE_ANAMUL_AI_URL` (the Lambda Function URL) for Production and Preview, as a **Config** value, not a Secret: Vite copies every `VITE_` variable into the website's JavaScript when it builds, so anyone can read it in their browser. Fine for a public URL, never for a key.
 - Because the value is copied in at build time, the old preview didn't change until Vercel built it again. A new commit did that.
 - The website drops a trailing slash from the URL, so a request can never go to `//ask`.
