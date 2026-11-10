@@ -154,3 +154,17 @@
 **My answer (1):** A Docker image is a sealed box with everything my bot needs to run: Python, its packages, my code, and my chunks and embeddings. It runs the same on AWS as on my laptop, so there are no "it works on my machine" surprises. AWS Lambda runs my bot straight from that image.
 
 **My answer (2):** The image gets copied to ECR, and anyone with a copy could open it, so secrets must never be inside it (`.dockerignore` keeps `.env` out). My keys live in Lambda's settings instead: encrypted by AWS, separate from the code, and easy to change without rebuilding, like Vercel's environment variables for my website.
+
+## Day 13 (Nov 9): The beta is live on anamulhasan.com
+- My website now talks to the bot on AWS. In Vercel I added `VITE_ANAMUL_AI_URL` (the Lambda Function URL) for Production and Preview, as a **Config** value, not a Secret: Vite copies every `VITE_` variable into the website's JavaScript when it builds, so anyone can read it in their browser. Fine for a public URL, never for a key.
+- Because the value is copied in at build time, the old preview didn't change until Vercel built it again. A new commit did that.
+- The website drops a trailing slash from the URL, so a request can never go to `//ask`.
+- CORS from Day 10 already allowed my preview links, so the preview worked against AWS on the first try.
+- Tested the preview on my laptop, and at phone size (375 px): the floating bubble, the /chat page and dark mode. With the bot warm, an answer took about 2.3 seconds.
+- Bug found in testing: in dark mode the chat box had a lighter rectangle inside it. My site's global dark style for all text boxes was more specific in CSS than `dark:bg-transparent`, so it won. Tailwind's `!bg-transparent` (important) fixed it.
+- I said "merge it", main was fast-forwarded to the branch, Vercel built production in about a minute, and Anamul AI answered "Which book changed your life?" on anamulhasan.com.
+- AWS housekeeping the same night: confirmed my account and root email, MFA on both root and my IAM user, no root access keys, and the bill so far is $0.00.
+
+**My answer (1):** When Vercel builds my website, it bakes every `VITE_` variable into the finished files, like ingredients in a cake. The old preview was baked before I added the bot's address, so it needed a new build. And since every visitor gets those files, anyone can read a `VITE_` variable. That's fine for a public address, but my API keys stay hidden in Lambda.
+
+**My answer (2):** My website runs in the visitor's browser, and their question goes straight to my bot on AWS Lambda, not through Vercel. After the CORS check, the bot finds the 5 pieces of my data closest in meaning to the question (with Voyage), and Claude writes the answer in my voice from them. The answer comes back to the chat in about 2 seconds.

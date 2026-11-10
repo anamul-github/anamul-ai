@@ -3,12 +3,14 @@
 A chatbot that answers questions about Anamul Hasan (resume, projects, articles and book notes), with sources.
 Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvector, LangGraph, AWS.
 
+**Try it (beta):** [anamulhasan.com/chat](https://www.anamulhasan.com/chat)
+
 ## How it works
 1. **Collect:** my articles, book notes, resume, About page and projects are saved as Markdown in `data/`.
 2. **Chunk:** everything is split into small sections, each labeled with where it came from (like *Resume > Work experience > DevOps Engineer*).
 3. **Search:** find the chunks closest in meaning to the question, using embeddings (meaning fingerprints) from Voyage AI. They're in a local file for now; PostgreSQL + pgvector is next.
 4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and returns its sources.
-5. **Ship:** the API runs on AWS Lambda from a Docker image, with a limit of 20 questions per hour per visitor. "Anamul AI", a chat page and a floating chat bubble on [anamulhasan.com](https://www.anamulhasan.com), is built on a branch and goes live next.
+5. **Ship:** the API runs on AWS Lambda from a Docker image, with a limit of 20 questions per hour per visitor. Visitors chat with it as "Anamul AI" on [anamulhasan.com](https://www.anamulhasan.com/chat), on a chat page or from a floating chat bubble.
 
 ## Progress
 - [x] Day 1: set up Python with uv, and learn Python basics as a JavaScript developer
@@ -23,7 +25,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 10: "Anamul AI" on my website: a chat page and a floating bubble, talking to this API (CORS, 21 tests)
 - [x] Day 11: a detailed profile in my own words, written from an interview, so the bot knows me much better (24 tests)
 - [x] Day 12: live on AWS Lambda from a Docker image, with a question limit per visitor and my keys kept out of the image (25 tests)
-- [ ] Day 13: connect my website to the live bot and launch the beta on anamulhasan.com
+- [x] Day 13: the beta is live: my website talks to the bot on AWS, so anyone can chat with it at [anamulhasan.com/chat](https://www.anamulhasan.com/chat)
 - [ ] Nov 15–21: learn from real questions (logs and feedback), an eval score, pgvector, Terraform, GitHub Actions
 - [ ] Nov 22–30: follow-up questions, a LangGraph agent, streaming answers, and v1.0
 
