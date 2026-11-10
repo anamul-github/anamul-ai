@@ -8,7 +8,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 2. **Chunk:** everything is split into small sections, each labeled with where it came from (like *Resume > Work experience > DevOps Engineer*).
 3. **Search:** find the chunks closest in meaning to the question, using embeddings (meaning fingerprints) from Voyage AI. They're in a local file for now; PostgreSQL + pgvector is next.
 4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and returns its sources.
-5. **Ship** *(coming in Weeks 3–4)*: an API on AWS and a chat widget on [anamulhasan.com](https://www.anamulhasan.com).
+5. **Ship:** "Anamul AI", a chat page and a floating chat bubble on [anamulhasan.com](https://www.anamulhasan.com) (built, on a branch), and the API on AWS (next).
 
 ## Progress
 - [x] Day 1: set up Python with uv, and learn Python basics as a JavaScript developer
@@ -20,6 +20,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 7: my first message to Claude through the API, with the key kept safely in `.env`
 - [x] Day 8: Claude writes the answers in `/ask`, in my voice, using only the matching chunks (14 tests)
 - [x] Day 9: search by meaning with Voyage AI embeddings, so "Tell me about yourself?" now finds my About page (19 tests)
+- [x] Day 10: "Anamul AI" on my website: a chat page and a floating bubble, talking to this API (CORS, 21 tests)
 - [ ] Week 2: Claude API, search with pgvector, and a set of test questions
 - [ ] Week 3: Docker, then AWS with Terraform and GitHub Actions
 - [ ] Week 4: chat widget on anamulhasan.com, a LangGraph agent, and launch

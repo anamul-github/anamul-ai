@@ -113,3 +113,15 @@
 **My answer (1):** An embedding is a "meaning fingerprint": a list of 1,024 numbers that represents what a text means. Meaning search turns the question into a fingerprint and finds the chunks with the closest fingerprints. "Tell me about yourself?" shares no important words with my About page, but their meanings are close, so meaning search found it when keyword search found nothing.
 
 **My answer (2):** Each chunk gets one fingerprint for its whole text. My OATI DevOps chunk is mostly about infrastructure (Ansible, CI/CD, servers), and only 2 of its 8 bullets are about leading, so its fingerprint means "DevOps work" and the leadership gets drowned out, like strawberries in a banana smoothie. Smaller chunks would give leadership its own fingerprint.
+
+## Day 10 (Nov 9): Anamul AI on my website
+- I decided to launch a beta early, for anyone to chat with for fun, and revised the plan for the rest of November.
+- On my website (React, branch `feat/anamul-ai-chat`): a `/chat` page, a floating chat bubble on every other page, and the header's Coffee Chat button is now "Anamul AI · Beta". The Coffee Chat page stays, linked from the chat page, article footers and contact cards.
+- The website calls `POST /ask` with axios, shows "thinking" dots while it waits, and turns errors (busy, offline, too short) into friendly messages.
+- The subtitle says "My AI avatar. Ask me anything about my work, projects and life." It doesn't claim the bot is "trained" on my data, because it looks things up (RAG) instead.
+- Sources are hidden for now, because the API returns all 5 chunks, not only the ones Claude used. They come back as "Read more" links later.
+- On the bot: CORS middleware lets only my website, its Vercel previews and local development call the API from a browser. 21 tests.
+
+**My answer (1):** CORS is a browser safety rule: a web page may only call APIs at its own address unless the API says the page is allowed. My website and my bot run at different addresses, so the bot's CORS middleware allows only my site (plus its previews and local development). Other sites can't use my bot from a browser. My Express backend's `cors` package does the same job for my articles.
+
+**My answer (2):** `src/layout/Main.jsx` wraps every page and stays on screen while I navigate. If the bubble and the chat page each kept their own state, the conversation would be lost when switching between them. So the conversation lives in a Provider (React Context) in the layout, "lifting state up", and both read the same conversation.

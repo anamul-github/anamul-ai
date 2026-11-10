@@ -107,3 +107,15 @@ def test_ask_skips_claude_when_nothing_is_close_in_meaning(monkeypatch, fake_cla
     body = client.post("/ask", json={"question": "xylophone zebra"}).json()
     assert body["sources"] == []
     assert fake_claude == []  # Below MIN_SIMILARITY, so no Claude call
+
+
+# --- CORS: which websites may call the API from a browser ---
+
+def test_my_website_may_call_the_api():
+    response = client.get("/", headers={"Origin": "https://www.anamulhasan.com"})
+    assert response.headers["access-control-allow-origin"] == "https://www.anamulhasan.com"
+
+
+def test_other_websites_may_not():
+    response = client.get("/", headers={"Origin": "https://example.com"})
+    assert "access-control-allow-origin" not in response.headers

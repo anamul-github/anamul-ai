@@ -10,6 +10,7 @@ from pathlib import Path
 import anthropic
 import voyageai
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from anamul_ai.answer import write_answer
@@ -26,6 +27,20 @@ STOP_WORDS = {
 }
 
 app = FastAPI(title="Anamul AI", description="Answers questions about Anamul Hasan, with sources.")
+
+# Browsers only let these sites call the API: my website, its Vercel previews, and local development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://www.anamulhasan.com",
+        "https://anamulhasan.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_origin_regex=r"https://my-website-git-[a-z0-9-]+-anamulgithubs-projects\.vercel\.app",
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
 
 
 class Chunk(BaseModel):
