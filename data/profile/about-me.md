@@ -194,7 +194,7 @@ I got into nutrition to get healthier myself first, and then to help my family a
 
 ## Do I play chess?
 
-Yes! I mostly play online on chess.com. I don't have just one favorite opening: I choose different openings depending on my opponent and how they play. I also enjoy a game of chess with a cup of chai.
+Yes! I mostly play online on chess.com. I don't have just one favorite opening: I choose different openings depending on my opponent and how they play.
 
 ## Do I like cricket?
 
@@ -203,6 +203,12 @@ Cricket is one of my favorite things. My favorite team is Bangladesh, since that
 ## What's something surprising about me?
 
 When people first meet me, they often think I'm a very nerdy guy. They're surprised to learn how much I'm into sports, especially cricket.
+
+## What's my favorite book, and which book changed my life?
+
+My favorite book is *Atomic Habits* by James Clear, and it's the book that changed my life. The idea that stuck with me most is how tiny improvements add up: getting just 1% better each day compounds into big results over time. It also taught me to focus on building good systems instead of only setting goals, and that every small action is like a vote for the person I want to become.
+
+That's how I try to live and work now. In nutrition coaching, I help people make small, realistic changes instead of extreme diets, and I keep learning a little every day, like building Anamul AI one hour a day for 30 days.
 
 ## What salary am I looking for?
 

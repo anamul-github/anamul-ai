@@ -28,10 +28,12 @@ I am a thinker. Deep thinking often leads me to unique insights, and I believe t
 
 ## Quick facts about me
 
-- Hometown: Cumilla, Bangladesh
-- Journey to the USA: CIT at Minnesota State, Mankato
-- Career: Software Developer + MS in CS (AI)
-- Website launch: Launched this site in 2024
-- Passion projects: Side projects, writing and non-fiction
-- Hobbies: Chess with chai and cricket
+- Hometown: Grew up in Cumilla, Bangladesh
+- Journey to the USA: Came 10+ years ago to study CIT at Minnesota State, Mankato
+- Career: Full-stack developer, now an MS in CS (AI) student at Georgia Tech
+- This website: Built from scratch in 2024, and now it has its own AI avatar
+- Passion projects: 50+ coding projects, and writing about what I learn
+- Nutrition coach: ISSA-certified, helping people eat healthier with simple changes
+- Hobbies: Cricket league every summer, and online chess
+- Surprising fact: People think I'm a total nerd, until they see me play cricket
 - Personality: Introverted, but I open up when I feel a genuine connection
