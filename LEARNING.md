@@ -168,3 +168,14 @@
 **My answer (1):** When Vercel builds my website, it bakes every `VITE_` variable into the finished files, like ingredients in a cake. The old preview was baked before I added the bot's address, so it needed a new build. And since every visitor gets those files, anyone can read a `VITE_` variable. That's fine for a public address, but my API keys stay hidden in Lambda.
 
 **My answer (2):** My website runs in the visitor's browser, and their question goes straight to my bot on AWS Lambda, not through Vercel. After the CORS check, the bot finds the 5 pieces of my data closest in meaning to the question (with Voyage), and Claude writes the answer in my voice from them. The answer comes back to the chat in about 2 seconds.
+
+## Day 14 (Nov 10): Better answers from real use
+- The first real "hi" on the live site got a list of topics and hobbies. Search still hands Claude the 5 closest chunks, even for a greeting, and "two to four sentences" invited it to fill the space. New rule: hi, thanks and bye get one short sentence.
+- I asked the live bot 10 common visitor questions. The facts were right, but four patterns made the answers heavy: hobbies in almost every answer, a long "Who are you?" that switched voices, too many coffee-chat links, and five-sentence answers. Four new rules fixed them: hobbies only when asked; a one-or-two-sentence "Who are you?"; the coffee chat only when the bot can't answer, or for salary, goals or meeting the real me; two or three sentences.
+- I tested the same questions before and after, locally first, then deployed. "What do you do for fun?" still talks about cricket and chess, because that's what was asked.
+- The data mattered as much as the instructions. "Chess with chai" came from my About page, and with no favorite book in my profile, the bot hedged and pushed a coffee chat. I rewrote my About page's quick facts as 9 specific cards (preview branch, then "merge it"), gave the bot the same facts, and added my favorite book, *Atomic Habits*, the book that changed my life.
+- Any data change means: update `data/profile`, re-chunk (now 119 chunks), re-embed (17,698 Voyage tokens), and deploy.
+
+**My answer (1):** Even for "hi", the bot searched my data and gave Claude the 5 closest chunks, and my instructions asked for two to four sentences, so Claude filled the space with facts about me. A new rule fixed it: hi, thanks and bye get one short sentence, with no facts nobody asked for.
+
+**My answer (2):** The bot can only be as good as what I give it. "Chess with chai" came straight from my About page, and with no favorite book in my profile, it could only hedge and suggest a coffee chat. The instructions control how it answers, but the data decides what it can say.
