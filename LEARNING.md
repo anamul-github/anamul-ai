@@ -169,7 +169,7 @@
 
 **My answer (2):** My website runs in the visitor's browser, and their question goes straight to my bot on AWS Lambda, not through Vercel. After the CORS check, the bot finds the 5 pieces of my data closest in meaning to the question (with Voyage), and Claude writes the answer in my voice from them. The answer comes back to the chat in about 2 seconds.
 
-## Day 14 (Nov 10): Better answers from real use
+## Day 14 (Nov 11): Better answers from real use
 - The first real "hi" on the live site got a list of topics and hobbies. Search still hands Claude the 5 closest chunks, even for a greeting, and "two to four sentences" invited it to fill the space. New rule: hi, thanks and bye get one short sentence.
 - I asked the live bot 10 common visitor questions. The facts were right, but four patterns made the answers heavy: hobbies in almost every answer, a long "Who are you?" that switched voices, too many coffee-chat links, and five-sentence answers. Four new rules fixed them: hobbies only when asked; a one-or-two-sentence "Who are you?"; the coffee chat only when the bot can't answer, or for salary, goals or meeting the real me; two or three sentences.
 - I tested the same questions before and after, locally first, then deployed. "What do you do for fun?" still talks about cricket and chess, because that's what was asked.
