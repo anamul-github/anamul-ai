@@ -139,3 +139,34 @@ def test_a_visitor_is_limited_after_too_many_questions(fake_claude):
     response = client.post("/ask", json={"question": "hi"})
     assert response.status_code == 429
     assert len(fake_claude) == MAX_QUESTIONS_PER_HOUR  # The extra question never reached Claude
+
+
+def test_ask_returns_the_chat_id_when_the_chat_is_saved(monkeypatch, fake_claude):
+    monkeypatch.setattr("anamul_ai.api.save_chat", lambda question, answer, sources: "a" * 32)
+    response = client.post("/ask", json={"question": "What did you do at OATI?"})
+    assert response.json()["chat_id"] == "a" * 32
+
+
+def test_ask_still_answers_when_the_chat_is_not_saved(fake_claude):
+    response = client.post("/ask", json={"question": "What did you do at OATI?"})
+    assert response.json()["answer"] == "A fake answer."
+    assert response.json()["chat_id"] is None
+
+
+def test_feedback_must_be_up_or_down():
+    response = client.post("/feedback", json={"chat_id": "a" * 32, "rating": "meh"})
+    assert response.status_code == 422
+
+
+def test_feedback_for_an_unknown_chat_is_a_404(monkeypatch):
+    monkeypatch.setattr("anamul_ai.api.save_feedback", lambda chat_id, rating: False)
+    response = client.post("/feedback", json={"chat_id": "a" * 32, "rating": "up"})
+    assert response.status_code == 404
+
+
+def test_feedback_is_saved(monkeypatch):
+    saved = []
+    monkeypatch.setattr("anamul_ai.api.save_feedback", lambda chat_id, rating: saved.append(rating) or True)
+    response = client.post("/feedback", json={"chat_id": "a" * 32, "rating": "down"})
+    assert response.status_code == 200
+    assert saved == ["down"]

@@ -8,6 +8,7 @@ import re
 import time
 from collections import defaultdict, deque
 from pathlib import Path
+from typing import Literal
 
 import anthropic
 import voyageai
@@ -16,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from anamul_ai.answer import write_answer
+from anamul_ai.chats import save_chat, save_feedback
 from anamul_ai.embed import embed_query, load_embeddings, similarity
 
 CHUNKS_FILE = Path("data/chunks.jsonl")
@@ -158,6 +160,7 @@ class AskResponse(BaseModel):
     question: str
     answer: str
     sources: list[Source]
+    chat_id: str | None = None  # For the thumbs up/down buttons; None when the chat wasn't saved
 
 
 def check_rate_limit(visitor: str) -> None:
@@ -188,4 +191,18 @@ def ask(request: AskRequest, http: Request) -> AskResponse:
         source = Source(title=result.chunk.title, url=result.chunk.url, section=result.chunk.section)
         if source not in sources:  # Several chunks can come from one section; list it once
             sources.append(source)
-    return AskResponse(question=request.question, answer=answer, sources=sources)
+    chat_id = save_chat(request.question, answer, [source.section for source in sources])
+    return AskResponse(question=request.question, answer=answer, sources=sources, chat_id=chat_id)
+
+
+class FeedbackRequest(BaseModel):
+    chat_id: str = Field(pattern=r"^[0-9a-f]{32}$")  # The id /ask returned
+    rating: Literal["up", "down"]
+
+
+@app.post("/feedback")
+def feedback(request: FeedbackRequest) -> dict:
+    """A visitor's thumbs up or down on one answer, so I know which answers to improve."""
+    if not save_feedback(request.chat_id, request.rating):
+        raise HTTPException(status_code=404, detail="No saved chat with that id")
+    return {"saved": True}
