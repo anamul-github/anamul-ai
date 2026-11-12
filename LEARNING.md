@@ -179,3 +179,17 @@
 **My answer (1):** Even for "hi", the bot searched my data and gave Claude the 5 closest chunks, and my instructions asked for two to four sentences, so Claude filled the space with facts about me. A new rule fixed it: hi, thanks and bye get one short sentence, with no facts nobody asked for.
 
 **My answer (2):** The bot can only be as good as what I give it. "Chess with chai" came straight from my About page, and with no favorite book in my profile, it could only hedge and suggest a coffee chat. The instructions control how it answers, but the data decides what it can say.
+
+## Day 15 (Nov 12): Seeing what visitors ask
+- Until today the bot saved nothing. Lambda's logs only said each request started and ended, and its metrics only counted requests.
+- Now every chat goes into a DynamoDB table, `anamul-ai-chats` (Ohio, pay per request): the question, the answer, the time and which parts of my data it used. No IP address and no name. A time-to-live field (`expires_at`) makes DynamoDB delete each chat by itself after 90 days.
+- Least privilege: the bot's IAM role can only add a chat and add a rating to that one table. It can't read or delete. Reading uses my own AWS login on my Mac: `uv run python -m anamul_ai.chats`.
+- Only the live bot saves chats (it checks for `AWS_LAMBDA_FUNCTION_NAME`, which Lambda sets), so my local runs and tests never fill the table. If a save fails, the visitor still gets their answer.
+- `POST /feedback` records a thumbs up or down for a chat id. A DynamoDB condition only updates chats that exist, so nobody can fill the table with junk.
+- On my website: thumbs up/down under each answer (one pick, then "Thanks for the feedback!"), and an honest line under the chat: "Chats are saved anonymously to help it improve."
+- 33 tests (8 new). A fake table stands in for DynamoDB, so the tests never touch AWS.
+- Tested live: ask, saved, thumbs up, and it shows in my reader; a made-up chat id is rejected. First real feedback: a thumbs down on "Tell me about yourself".
+
+**My answer (1):** Only I, the owner, should see the chats and ratings, so I can read and delete them with my own AWS login. The bot only needs to save them, so that's all its AWS role allows. Even if someone tricked the bot or found a bug in it, it couldn't read other visitors' chats or delete anything. That's least privilege: give each part only the permissions it needs.
+
+**My answer (2):** Only the live bot on AWS saves chats, so my local tests never mix with real visitors' questions. If saving fails, the visitor still gets their answer, because a broken save should never break the chat. I'd just miss that one chat in my reader.

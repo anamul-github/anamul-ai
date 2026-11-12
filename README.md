@@ -11,6 +11,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 3. **Search:** find the chunks closest in meaning to the question, using embeddings (meaning fingerprints) from Voyage AI. They're in a local file for now; PostgreSQL + pgvector is next.
 4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and returns its sources.
 5. **Ship:** the API runs on AWS Lambda from a Docker image, with a limit of 20 questions per hour per visitor. Visitors chat with it as "Anamul AI" on [anamulhasan.com](https://www.anamulhasan.com/chat), on a chat page or from a floating chat bubble.
+6. **Learn:** every chat is saved in DynamoDB (no personal details, deleted after 90 days) with a thumbs up or down, so I can see what visitors ask and fix weak answers.
 
 ## Progress
 - [x] Day 1: set up Python with uv, and learn Python basics as a JavaScript developer
@@ -27,6 +28,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 12: live on AWS Lambda from a Docker image, with a question limit per visitor and my keys kept out of the image (25 tests)
 - [x] Day 13: the beta is live: my website talks to the bot on AWS, so anyone can chat with it at [anamulhasan.com/chat](https://www.anamulhasan.com/chat)
 - [x] Day 14: better answers from real use: short greetings, focused answers, and fresher facts about me (my favorite book, a new About page)
+- [x] Day 15: see what visitors ask: chats saved in DynamoDB (no personal details, deleted after 90 days), plus thumbs up/down buttons (33 tests)
 - [ ] Nov 15–21: learn from real questions (logs and feedback), an eval score, pgvector, Terraform, GitHub Actions
 - [ ] Nov 22–30: follow-up questions, a LangGraph agent, streaming answers, and v1.0
 
@@ -45,4 +47,5 @@ uv run python learn/day07_hello_claude.py   # Day 7: first message to Claude
 uv run python -m anamul_ai.embed        # Day 9: meaning fingerprints for every chunk (needs VOYAGE_API_KEY in .env)
 ./scripts/deploy.sh                     # Day 12: build the Docker image, push it to ECR, update the Lambda function
 ./scripts/set_lambda_keys.sh            # Day 12: copy the API keys from .env into Lambda (prints nothing secret)
+uv run python -m anamul_ai.chats        # Day 15: read the latest saved chats and their thumbs up/down
 ```
