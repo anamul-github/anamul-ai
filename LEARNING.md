@@ -193,3 +193,15 @@
 **My answer (1):** Only I, the owner, should see the chats and ratings, so I can read and delete them with my own AWS login. The bot only needs to save them, so that's all its AWS role allows. Even if someone tricked the bot or found a bug in it, it couldn't read other visitors' chats or delete anything. That's least privilege: give each part only the permissions it needs.
 
 **My answer (2):** Only the live bot on AWS saves chats, so my local tests never mix with real visitors' questions. If saving fails, the visitor still gets their answer, because a broken save should never break the chat. I'd just miss that one chat in my reader.
+
+## Day 16 (Nov 13): An eval set, so I can measure the bot
+- A real visitor said the bot jumped to a book when he asked about the point of life. I fixed that by hand, but checking by hand doesn't scale, so today the bot got an eval set: 20 fixed questions, each with rules for a good answer (`evals/cases.json`).
+- The rules are simple checks on the answer's text: words it should say, words it should not say, a forbidden pattern (like any year, for "When did you leave OATI?"), and a sentence limit. The questions come from everything I've fixed so far, including visitors' real questions.
+- `uv run python -m anamul_ai.evals` asks the real bot each question (real Claude and Voyage, about 30 cents and 50 seconds for all 20) and prints a score. Every answer is saved in `evals/last_run.json`, which isn't committed.
+- First run: 18/20. Both failures were mistakes in my rules, not in the bot: my sentence counter counted "Hi!" as a sentence, and I had banned the word "bank" even in a general remark. Lesson: read the failures before trusting the score, because the eval can be wrong too.
+- After fixing the two rules: 20/20. To check the eval isn't just easy, I ran it against my Day 13 instructions: 16/20. It caught the long "hi", the hobbies in "Who are you?" and "Tell me about yourself", and the money story.
+- Unit tests vs evals: my 41 pytest tests use a fake Claude, so they're free and check my code. The eval uses the real Claude and checks the answers themselves. Answers change a little every run, so an eval gives a score, not a guarantee.
+
+**My answer (1):** The bot's answers were fine, but two of my rules were wrong: my counter treated "Hi!" as a full sentence, and I had banned the word "bank" even in a harmless remark. So the eval can be wrong too, just like the bot. I should read the failures before trusting the score.
+
+**My answer (2):** A test that always passes tells me nothing. Running the eval on my Day 13 instructions showed that it can fail: it scored 16/20 and caught the problems I had already fixed. Now if a future change brings one of them back, the score will drop and I'll notice.

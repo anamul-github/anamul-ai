@@ -29,7 +29,8 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 13: the beta is live: my website talks to the bot on AWS, so anyone can chat with it at [anamulhasan.com/chat](https://www.anamulhasan.com/chat)
 - [x] Day 14: better answers from real use: short greetings, focused answers, and fresher facts about me (my favorite book, a new About page)
 - [x] Day 15: see what visitors ask: chats saved in DynamoDB (no personal details, deleted after 90 days), plus thumbs up/down buttons (33 tests)
-- [ ] Nov 15–21: learn from real questions (logs and feedback), an eval score, pgvector, Terraform, GitHub Actions
+- [x] Day 16: an eval set: 20 questions with rules for a good answer, and a score (20/20 today, 16/20 with last week's instructions; 41 tests)
+- [ ] Nov 17–21: better answers from the eval score, pgvector, Terraform, GitHub Actions
 - [ ] Nov 22–30: follow-up questions, a LangGraph agent, streaming answers, and v1.0
 
 What I learned each day is in [LEARNING.md](LEARNING.md).
@@ -48,4 +49,5 @@ uv run python -m anamul_ai.embed        # Day 9: meaning fingerprints for every 
 ./scripts/deploy.sh                     # Day 12: build the Docker image, push it to ECR, update the Lambda function
 ./scripts/set_lambda_keys.sh            # Day 12: copy the API keys from .env into Lambda (prints nothing secret)
 uv run python -m anamul_ai.chats        # Day 15: read the latest saved chats and their thumbs up/down
+uv run python -m anamul_ai.evals        # Day 16: score the bot on 20 questions (real Claude, about 30 cents)
 ```
