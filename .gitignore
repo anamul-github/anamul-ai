@@ -21,3 +21,6 @@ data/chunks.jsonl
 
 # Built by embed.py; rebuild it with: uv run python -m anamul_ai.embed
 data/embeddings.json
+
+# Every answer from the last eval run; rebuild it with: uv run python -m anamul_ai.evals
+evals/last_run.json
