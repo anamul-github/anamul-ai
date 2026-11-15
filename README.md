@@ -9,7 +9,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 1. **Collect:** my articles, book notes, resume, About page and projects are saved as Markdown in `data/`.
 2. **Chunk:** everything is split into small sections, each labeled with where it came from (like *Resume > Work experience > DevOps Engineer*).
 3. **Search:** find the chunks closest in meaning to the question, using embeddings (meaning fingerprints) from Voyage AI. They're in a local file for now; PostgreSQL + pgvector is next.
-4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and returns its sources.
+4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and says which of them it used, so the site can link to the right pages.
 5. **Ship:** the API runs on AWS Lambda from a Docker image, with a limit of 20 questions per hour per visitor. Visitors chat with it as "Anamul AI" on [anamulhasan.com](https://www.anamulhasan.com/chat), on a chat page or from a floating chat bubble.
 6. **Learn:** every chat is saved in DynamoDB (no personal details, deleted after 90 days) with a thumbs up or down, so I can see what visitors ask and fix weak answers.
 
@@ -30,7 +30,8 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 14: better answers from real use: short greetings, focused answers, and fresher facts about me (my favorite book, a new About page)
 - [x] Day 15: see what visitors ask: chats saved in DynamoDB (no personal details, deleted after 90 days), plus thumbs up/down buttons (33 tests)
 - [x] Day 16: an eval set: 20 questions with rules for a good answer, and a score (20/20 today, 16/20 with last week's instructions; 41 tests)
-- [ ] Nov 17–21: better answers from the eval score, pgvector, Terraform, GitHub Actions
+- [x] Day 17: answers list only the sources Claude used, shown as "Read more" links on my site; the deploy script now verifies what Lambda runs (46 tests)
+- [ ] Nov 18–21: pgvector, Terraform, GitHub Actions
 - [ ] Nov 22–30: follow-up questions, a LangGraph agent, streaming answers, and v1.0
 
 What I learned each day is in [LEARNING.md](LEARNING.md).

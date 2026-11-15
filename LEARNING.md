@@ -205,3 +205,17 @@
 **My answer (1):** The bot's answers were fine, but two of my rules were wrong: my counter treated "Hi!" as a full sentence, and I had banned the word "bank" even in a harmless remark. So the eval can be wrong too, just like the bot. I should read the failures before trusting the score.
 
 **My answer (2):** A test that always passes tells me nothing. Running the eval on my Day 13 instructions showed that it can fail: it scored 16/20 and caught the problems I had already fixed. Now if a future change brings one of them back, the score will drop and I'll notice.
+
+## Day 17 (Nov 15): Only the sources Claude used, and a deploy that lied
+- Reading my saved chats showed noisy source lists: "What's your phone number?" listed "What salary am I looking for?" as a source. Search always gives Claude the 5 closest chunks, and the API reported all 5, used or not. That's why my website kept sources hidden.
+- Fix: structured output. Claude now has to reply in a fixed JSON shape (`output_config.format` with a JSON schema): the answer, plus `used_sources`, the numbers of the sources its facts came from. `/ask` returns only those. Greetings return none.
+- `write_answer` now returns an `Answer` (text + used source numbers). It ignores source numbers that don't exist, and if the reply isn't valid JSON it shows the text with no sources instead of crashing.
+- On my website, each answer now has "Read more" links to the pages it came from (one per page, at most three), and web addresses and emails inside an answer are real links. A visitor of one: I noticed the coffee chat address was plain text and asked for it.
+- The eval paid off on its second day: after changing how Claude replies, one command showed 20/20, so the new format didn't break the answers. 46 tests.
+- The deploy that lied: `deploy.sh` printed "Deployed", but the live bot still gave the old answers. Lambda was updated one second after the push, and the `latest` tag still pointed at the previous image, so Lambda kept the old code. I only caught it because I tested the live bot afterwards.
+- Fix: deploy the exact image by its digest (its fingerprint, like `sha256:3f39...`) instead of the `latest` tag, then ask Lambda which image it is running and fail loudly if it isn't the new one.
+- Order matters when two things ship together: the bot had to go live before the website, because the links depend on the bot's cleaner source list.
+
+**My answer (1):** Search always hands Claude the 5 closest pieces of my writing, and the bot used to report all 5 as sources, whether Claude used them or not. Now Claude has to fill in a small form: the answer, plus the numbers of the sources it actually used. The bot returns only those, so a greeting shows none.
+
+**My answer (2):** The script pushed the new image and updated Lambda one second later, using the `latest` label. For that moment the label still pointed at the old image, so Lambda kept the old code while the script printed "Deployed". Now the script deploys the image by its fingerprint (digest), then asks Lambda which image it's running, and fails if it isn't the new one. And I test the live bot after every deploy.
