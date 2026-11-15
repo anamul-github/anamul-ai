@@ -1,5 +1,7 @@
 """Claude writes the answer to a question, using only the chunks that search found."""
 
+import json
+from dataclasses import dataclass
 from functools import cache
 
 import anthropic
@@ -49,7 +51,30 @@ If someone asks who you are, answer in one or two sentences as Anamul AI: you're
 answering from his own writing, and they can ask about his work, projects and life.
 
 If someone asks whether they're talking to the real Anamul, say you're his AI avatar, answering from his \
-own writing, and that they can book a coffee chat to talk with him."""
+own writing, and that they can book a coffee chat to talk with him.
+
+In used_sources, list the ids of the sources your answer's facts actually came from, most important first. \
+Leave it empty for greetings and small talk, or when no source helped."""
+
+# Claude must reply in this exact shape, so the API can tell which sources it really used
+ANSWER_FORMAT = {
+    "type": "json_schema",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "answer": {"type": "string"},
+            "used_sources": {"type": "array", "items": {"type": "integer"}},
+        },
+        "required": ["answer", "used_sources"],
+        "additionalProperties": False,
+    },
+}
+
+
+@dataclass
+class Answer:
+    text: str
+    used: list[int]  # Which sources the answer came from: 1 is the first source, 2 the second, and so on
 
 
 @cache  # One client, created the first time an answer is needed
@@ -57,8 +82,8 @@ def get_client() -> anthropic.Anthropic:
     return anthropic.Anthropic(api_key=get_settings().anthropic_api_key.get_secret_value())
 
 
-def write_answer(question: str, sources: list[str]) -> str:
-    """Ask Claude to answer the question from these chunk texts only."""
+def write_answer(question: str, sources: list[str]) -> Answer:
+    """Ask Claude to answer the question from these chunk texts only, and to say which ones it used."""
     # Numbered <source> tags help Claude tell the chunks apart
     source_blocks = "\n\n".join(
         f'<source id="{number}">\n{text}\n</source>' for number, text in enumerate(sources, start=1)
@@ -66,7 +91,8 @@ def write_answer(question: str, sources: list[str]) -> str:
     response = get_client().beta.messages.create(
         model=get_settings().claude_model,
         max_tokens=2000,  # Room for brief thinking plus a two-to-four sentence answer
-        output_config={"effort": "low"},  # Answering from given sources is simple, so keep it fast and cheap
+        # Low effort: answering from given sources is simple, so keep it fast and cheap
+        output_config={"effort": "low", "format": ANSWER_FORMAT},
         # If a safety check declines, the API retries on another model (Opus 5.5 only; remove for Haiku)
         betas=["server-side-fallback-2026-07-01"],
         fallbacks="default",
@@ -74,5 +100,14 @@ def write_answer(question: str, sources: list[str]) -> str:
         messages=[{"role": "user", "content": f"<sources>\n{source_blocks}\n</sources>\n\nQuestion: {question}"}],
     )
     if response.stop_reason == "refusal":
-        return "Sorry, I can't help with that one."
-    return "".join(block.text for block in response.content if block.type == "text").strip()
+        return Answer(text="Sorry, I can't help with that one.", used=[])
+    text = "".join(block.text for block in response.content if block.type == "text").strip()
+    try:
+        reply = json.loads(text)
+    except json.JSONDecodeError:  # Cut off before the JSON finished: show what there is, with no sources
+        return Answer(text=text, used=[])
+    used = []
+    for number in reply["used_sources"]:
+        if 1 <= number <= len(sources) and number not in used:  # Ignore ids that don't exist, and repeats
+            used.append(number)
+    return Answer(text=reply["answer"].strip(), used=used)

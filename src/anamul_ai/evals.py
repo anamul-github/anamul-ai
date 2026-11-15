@@ -45,7 +45,7 @@ def check(answer: str, case: dict) -> list[str]:
 def ask_bot(question: str) -> str:
     """The same two steps as /ask: find the closest chunks, then let Claude answer from them."""
     results = find_chunks(question)
-    return write_answer(question, [result.chunk.text for result in results])
+    return write_answer(question, [result.chunk.text for result in results]).text
 
 
 def main() -> None:

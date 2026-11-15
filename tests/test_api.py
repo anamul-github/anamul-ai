@@ -3,6 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from anamul_ai.answer import Answer
 from anamul_ai.api import MAX_QUESTIONS_PER_HOUR, app, recent_questions
 
 client = TestClient(app)
@@ -22,12 +23,15 @@ def fresh_rate_limit():
 
 @pytest.fixture
 def fake_claude(monkeypatch):
-    """Replace Claude with a fake, so tests are free, fast and predictable. Returns the calls it got."""
+    """Replace Claude with a fake, so tests are free, fast and predictable. Returns the calls it got.
+
+    The fake says it used only the first source, when there is one.
+    """
     calls = []
 
     def fake_write_answer(question, sources):
         calls.append({"question": question, "sources": sources})
-        return "A fake answer."
+        return Answer(text="A fake answer.", used=[1] if sources else [])
 
     monkeypatch.setattr("anamul_ai.api.write_answer", fake_write_answer)
     return calls
@@ -74,6 +78,12 @@ def test_ask_returns_an_answer_with_sources(fake_claude):
     body = response.json()
     assert body["answer"] == "A fake answer."
     assert body["sources"][0]["title"] in {"Anamul Hasan's resume", "About Anamul Hasan, in depth"}  # Both cover OATI
+
+
+def test_ask_returns_only_the_sources_claude_used(fake_claude):
+    body = client.post("/ask", json={"question": "What did Anamul do at OATI?"}).json()
+    assert len(fake_claude[0]["sources"]) > 1  # Search found several chunks
+    assert len(body["sources"]) == 1  # But the fake Claude used only the first
 
 
 def test_ask_sends_claude_the_matching_chunks(fake_claude):

@@ -150,7 +150,7 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=2, max_length=300)
 
 
-class Source(BaseModel):  # Where an answer came from, so the widget can link to it
+class Source(BaseModel):  # A place the answer's facts came from, so the widget can link to it
     title: str
     url: str
     section: str
@@ -181,18 +181,20 @@ def ask(request: AskRequest, http: Request) -> AskResponse:
     try:
         results = find_chunks(request.question)
         # With no close chunks, Claude can still greet or chat, but the system prompt stops it from stating facts
-        answer = write_answer(request.question, [result.chunk.text for result in results])
+        reply = write_answer(request.question, [result.chunk.text for result in results])
     except (anthropic.APIError, voyageai.error.VoyageError):
         # Claude or Voyage is down or rate-limited: a polite 503 instead of a crash
         raise HTTPException(status_code=503, detail="The answer service is busy right now. Please try again in a minute.")
 
+    # Only the sources Claude says it used, not everything search found
     sources = []
-    for result in results:
-        source = Source(title=result.chunk.title, url=result.chunk.url, section=result.chunk.section)
+    for number in reply.used:
+        chunk = results[number - 1].chunk
+        source = Source(title=chunk.title, url=chunk.url, section=chunk.section)
         if source not in sources:  # Several chunks can come from one section; list it once
             sources.append(source)
-    chat_id = save_chat(request.question, answer, [source.section for source in sources])
-    return AskResponse(question=request.question, answer=answer, sources=sources, chat_id=chat_id)
+    chat_id = save_chat(request.question, reply.text, [source.section for source in sources])
+    return AskResponse(question=request.question, answer=reply.text, sources=sources, chat_id=chat_id)
 
 
 class FeedbackRequest(BaseModel):
