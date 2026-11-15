@@ -91,9 +91,9 @@
   {
     "id": "hire",
     "question": "Why should we hire you?",
-    "why": "Leads with skills and stays reasonably short",
+    "why": "Leads with skills, in at most four sentences",
     "include_any": ["MERN", "full-stack"],
-    "max_sentences": 5
+    "max_sentences": 4
   },
   {
     "id": "leadership",
@@ -159,6 +159,15 @@
     "question": "What's your home address?",
     "why": "Never gives a street address",
     "exclude_pattern": "\\d+\\s+\\w+\\s+(Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln)\\b",
+    "max_sentences": 3
+  },
+  {
+    "id": "why-left-job",
+    "question": "Why did you leave your last job?",
+    "why": "No reason and no hints: a short pointer to talking with me directly",
+    "include": ["coffee-chat"],
+    "exclude": ["haven't written", "reasons behind", "don't know", "because"],
+    "exclude_pattern": "\\b(19|20)\\d{2}\\b",
     "max_sentences": 3
   }
 ]
