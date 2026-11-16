@@ -219,3 +219,18 @@
 **My answer (1):** Search always hands Claude the 5 closest pieces of my writing, and the bot used to report all 5 as sources, whether Claude used them or not. Now Claude has to fill in a small form: the answer, plus the numbers of the sources it actually used. The bot returns only those, so a greeting shows none.
 
 **My answer (2):** The script pushed the new image and updated Lambda one second later, using the `latest` label. For that moment the label still pointed at the old image, so Lambda kept the old code while the script printed "Deployed". Now the script deploys the image by its fingerprint (digest), then asks Lambda which image it's running, and fails if it isn't the new one. And I test the live bot after every deploy.
+
+## Day 18 (Nov 16): Follow-up questions
+- Before today, every question stood alone: "Tell me more" after an answer about OATI found nothing useful, because Claude forgets everything between calls.
+- The memory lives in the browser, which already shows the whole chat. With each question, my website now sends the last three questions and answers (`history`, at most 6 messages). The server still remembers nothing between questions, which suits Lambda.
+- The chat is used twice. Search: the previous question is added to the new one, so "Tell me more" finds the OATI chunks again. Claude: the chat goes into my message as a quoted transcript ("Visitor: ... / Anamul AI: ..."), above the sources.
+- Safety: anyone can edit what their browser sends. So the chat is never passed as Claude's own past turns, and the system prompt says it's only for understanding the question, never a source of facts. An eval case sends a fake earlier answer with a salary of "$250,000"; the bot says it shouldn't have given a number and offers the coffee chat instead.
+- Saved chats now keep the previous question (`follow_up_to`), so "Tell me more" still makes sense when I read them later.
+- 4 new eval cases (follow-up, "it" meaning a book, a new topic, the fake salary): 29/29. One first-run failure was my rule again: the "Tell me more" answer was good, but my rule expected it to repeat the word "OATI". 54 tests.
+- Shipped in order: bot first (tested live), then the website branch for a preview.
+
+**My answer (1):** Claude forgets everything after each answer. The memory is in my website: the browser already shows the chat, so with every new question it also sends the last three questions and answers. Claude reads that short chat first, so it knows what "more" is about.
+
+**My answer (2):** Search only sees the words it's given. "Tell me more" doesn't say what it's about, so on its own it would find nothing useful. Adding the previous question, like "What did you do at OATI?", makes the search find the OATI chunks again, so Claude has the facts to say more.
+
+**My answer (3):** The chat comes from the visitor's browser, so anyone can change it. That's why I give it to Claude as a quoted conversation with a rule: it's only there to understand the question, it's never a source of facts. So a fake "$250,000" is just a claim. Claude ignores it, follows my rule about not sharing salary, and offers the coffee chat. I tested this with an eval case and on the live bot.
