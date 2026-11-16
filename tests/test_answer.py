@@ -11,12 +11,15 @@ from anamul_ai import answer
 @pytest.fixture
 def claude_says(monkeypatch):
     """Make the fake Claude reply with this text (and stop reason) on the next call."""
+    requests = []  # What was sent to the fake Claude
+
     def set_reply(text, stop_reason="end_turn"):
         response = SimpleNamespace(stop_reason=stop_reason, content=[SimpleNamespace(type="text", text=text)])
-        create = lambda **request: response
+        create = lambda **request: requests.append(request) or response
         client = SimpleNamespace(beta=SimpleNamespace(messages=SimpleNamespace(create=create)))
         monkeypatch.setattr(answer, "get_client", lambda: client)
         monkeypatch.setattr(answer, "get_settings", lambda: SimpleNamespace(claude_model="a-model"))
+        return requests
     return set_reply
 
 
@@ -37,6 +40,21 @@ def test_a_refusal_becomes_a_polite_reply_with_no_sources(claude_says):
     reply = answer.write_answer("something bad", ["chunk"])
     assert reply.text == "Sorry, I can't help with that one."
     assert reply.used == []
+
+
+def test_the_chat_so_far_goes_in_my_message_as_a_quoted_conversation(claude_says):
+    requests = claude_says(json.dumps({"answer": "More about OATI.", "used_sources": []}))
+    history = [("user", "What did you do at OATI?"), ("assistant", "DevOps and web apps.")]
+    answer.write_answer("Tell me more", ["chunk"], history)
+    messages = requests[0]["messages"]
+    assert len(messages) == 1 and messages[0]["role"] == "user"  # No made-up assistant turns
+    assert "Visitor: What did you do at OATI?\nAnamul AI: DevOps and web apps." in messages[0]["content"]
+
+
+def test_with_no_history_there_is_no_conversation_block(claude_says):
+    requests = claude_says(json.dumps({"answer": "Hi!", "used_sources": []}))
+    answer.write_answer("hi", [])
+    assert "conversation_so_far" not in requests[0]["messages"][0]["content"]
 
 
 def test_a_reply_that_is_not_json_is_shown_as_it_is(claude_says):

@@ -145,9 +145,20 @@ def find_chunks(question: str, limit: int = 5) -> list[SearchResult]:
 
 # --- The endpoint the chat widget calls ---
 
+class Turn(BaseModel):  # One earlier message in the chat
+    role: Literal["user", "assistant"]
+    text: str = Field(max_length=1500)  # Answers are four sentences at most, so this is plenty
+
+
+# The last three questions and answers: enough for "tell me more", and it keeps each question cheap
+MAX_HISTORY = 6
+
+
 class AskRequest(BaseModel):
     # At least 2 characters, so "hi" works; too long costs more per question and invites misuse
     question: str = Field(min_length=2, max_length=300)
+    # The chat so far, oldest first, so follow-ups like "tell me more" make sense. The browser sends it.
+    history: list[Turn] = Field(default=[], max_length=MAX_HISTORY)
 
 
 class Source(BaseModel):  # A place the answer's facts came from, so the widget can link to it
@@ -174,14 +185,29 @@ def check_rate_limit(visitor: str) -> None:
     times.append(now)
 
 
+def last_question(history: list[Turn]) -> str | None:
+    """The visitor's previous question, if there was one."""
+    for turn in reversed(history):
+        if turn.role == "user":
+            return turn.text
+    return None
+
+
+def search_text(question: str, history: list[Turn]) -> str:
+    """What to search for. "Tell me more" alone finds nothing useful, so add the previous question to it."""
+    previous = last_question(history)
+    return f"{previous}\n{question}" if previous else question
+
+
 @app.post("/ask")
 def ask(request: AskRequest, http: Request) -> AskResponse:
     """Answer a question about me with Claude, using only the closest chunks, and return the sources."""
     check_rate_limit(http.client.host if http.client else "unknown")
+    history = [(turn.role, turn.text) for turn in request.history]
     try:
-        results = find_chunks(request.question)
+        results = find_chunks(search_text(request.question, request.history))
         # With no close chunks, Claude can still greet or chat, but the system prompt stops it from stating facts
-        reply = write_answer(request.question, [result.chunk.text for result in results])
+        reply = write_answer(request.question, [result.chunk.text for result in results], history)
     except (anthropic.APIError, voyageai.error.VoyageError):
         # Claude or Voyage is down or rate-limited: a polite 503 instead of a crash
         raise HTTPException(status_code=503, detail="The answer service is busy right now. Please try again in a minute.")
@@ -193,7 +219,9 @@ def ask(request: AskRequest, http: Request) -> AskResponse:
         source = Source(title=chunk.title, url=chunk.url, section=chunk.section)
         if source not in sources:  # Several chunks can come from one section; list it once
             sources.append(source)
-    chat_id = save_chat(request.question, reply.text, [source.section for source in sources])
+    chat_id = save_chat(
+        request.question, reply.text, [source.section for source in sources], last_question(request.history)
+    )
     return AskResponse(question=request.question, answer=reply.text, sources=sources, chat_id=chat_id)
 
 

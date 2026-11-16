@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 
 from anamul_ai.answer import write_answer
-from anamul_ai.api import find_chunks
+from anamul_ai.api import Turn, find_chunks, search_text
 
 CASES_FILE = Path("evals/cases.json")
 RESULTS_FILE = Path("evals/last_run.json")  # Every answer from the last run, to read the failures; not committed
@@ -42,17 +42,19 @@ def check(answer: str, case: dict) -> list[str]:
     return problems
 
 
-def ask_bot(question: str) -> str:
+def ask_bot(question: str, history: list[dict] | None = None) -> str:
     """The same two steps as /ask: find the closest chunks, then let Claude answer from them."""
-    results = find_chunks(question)
-    return write_answer(question, [result.chunk.text for result in results]).text
+    turns = [Turn(**turn) for turn in history or []]
+    results = find_chunks(search_text(question, turns))
+    pairs = [(turn.role, turn.text) for turn in turns]
+    return write_answer(question, [result.chunk.text for result in results], pairs).text
 
 
 def main() -> None:
     cases = json.loads(CASES_FILE.read_text(encoding="utf-8"))
     results = []
     for case in cases:
-        answer = ask_bot(case["question"])
+        answer = ask_bot(case["question"], case.get("history"))
         problems = check(answer, case)
         results.append({**case, "answer": answer, "problems": problems})
         print(f"{'✅' if not problems else '❌'} {case['id']}: {case['question']}")

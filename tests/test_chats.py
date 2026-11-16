@@ -38,6 +38,12 @@ def test_a_chat_is_saved_on_lambda_with_no_personal_details(monkeypatch, fake_ta
     assert 89 < days_kept <= 90
 
 
+def test_a_follow_up_keeps_the_previous_question(monkeypatch, fake_table):
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "anamul-ai")
+    chats.save_chat("Tell me more", "Sure!", [], follow_up_to="What did you do at OATI?")
+    assert fake_table.items[0]["follow_up_to"] == "What did you do at OATI?"
+
+
 def test_a_failed_save_does_not_break_the_answer(monkeypatch):
     class BrokenTable:
         def put_item(self, Item):

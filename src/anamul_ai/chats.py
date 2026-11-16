@@ -27,20 +27,26 @@ def get_table():
     return boto3.resource("dynamodb", region_name="us-east-2").Table(TABLE_NAME)
 
 
-def save_chat(question: str, answer: str, sources: list[str]) -> str | None:
-    """Save one question and answer, with no IP address or name. Returns the chat's id, or None if not saved."""
+def save_chat(question: str, answer: str, sources: list[str], follow_up_to: str | None = None) -> str | None:
+    """Save one question and answer, with no IP address or name. Returns the chat's id, or None if not saved.
+
+    follow_up_to is the visitor's previous question, so "tell me more" still makes sense when I read it later.
+    """
     if not saving_enabled():
         return None
     chat_id = uuid.uuid4().hex
+    item = {
+        "id": chat_id,
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "question": question,
+        "answer": answer,
+        "sources": sources,
+        "expires_at": int(time.time()) + KEEP_DAYS * 86400,
+    }
+    if follow_up_to:
+        item["follow_up_to"] = follow_up_to
     try:
-        get_table().put_item(Item={
-            "id": chat_id,
-            "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "question": question,
-            "answer": answer,
-            "sources": sources,
-            "expires_at": int(time.time()) + KEEP_DAYS * 86400,
-        })
+        get_table().put_item(Item=item)
     except Exception as error:  # A failed save must never cost the visitor their answer
         print(f"Could not save chat: {error}")
         return None
@@ -85,7 +91,10 @@ def main() -> None:
     for chat in chats[:limit]:
         when = datetime.fromisoformat(chat["created_at"]).astimezone().strftime("%b %-d, %-I:%M %p")
         rating = {"up": "👍", "down": "👎"}.get(chat.get("rating"), "")
-        print(f"{when}  {rating}\nQ: {chat['question']}\nA: {chat['answer']}\n")
+        print(f"{when}  {rating}")
+        if "follow_up_to" in chat:
+            print(f"(after: {chat['follow_up_to']})")
+        print(f"Q: {chat['question']}\nA: {chat['answer']}\n")
 
 
 if __name__ == "__main__":
