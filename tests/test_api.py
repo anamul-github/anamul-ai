@@ -1,5 +1,9 @@
 """Tests for the API. They read data/chunks.jsonl (run anamul_ai.chunk first) and need no API keys."""
 
+import json
+
+import anthropic
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -216,3 +220,53 @@ def test_feedback_is_saved(monkeypatch):
     response = client.post("/feedback", json={"chat_id": "a" * 32, "rating": "down"})
     assert response.status_code == 200
     assert saved == ["down"]
+
+
+# --- Streaming answers ---
+
+@pytest.fixture
+def fake_stream(monkeypatch):
+    """A fake streaming Claude: two pieces of text, then the finished Answer."""
+    def fake_stream_answer(question, sources, history=None):
+        yield "Hi"
+        yield " there"
+        yield Answer(text="Hi there.", used=[1] if sources else [])
+
+    monkeypatch.setattr("anamul_ai.api.stream_answer", fake_stream_answer)
+
+
+def read_events(response) -> list[dict]:
+    return [json.loads(line) for line in response.text.splitlines()]
+
+
+def test_the_stream_sends_the_words_then_the_final_answer_with_sources(fake_stream):
+    response = client.post("/ask/stream", json={"question": "What did you do at OATI?"})
+    events = read_events(response)
+    assert [event["text"] for event in events if event["type"] == "text"] == ["Hi", " there"]
+    done = events[-1]
+    assert done["type"] == "done" and done["answer"] == "Hi there."
+    assert len(done["sources"]) == 1
+
+
+def test_the_stream_reports_a_claude_outage_as_an_error_event(monkeypatch):
+    def broken(question, sources, history=None):
+        yield "Hi"
+        raise anthropic.APIConnectionError(request=httpx.Request("POST", "https://api.anthropic.com"))
+
+    monkeypatch.setattr("anamul_ai.api.stream_answer", broken)
+    events = read_events(client.post("/ask/stream", json={"question": "hi"}))
+    assert events[-1]["type"] == "error"
+
+
+def test_the_stream_still_has_a_rate_limit(fake_stream):
+    for _ in range(MAX_QUESTIONS_PER_HOUR):
+        client.post("/ask/stream", json={"question": "hi"})
+    assert client.post("/ask/stream", json={"question": "hi"}).status_code == 429
+
+
+def test_on_lambda_the_rate_limit_uses_the_visitors_real_ip(fake_stream):
+    # Behind the web adapter every request seems to come from inside the container; the real IP is in this header
+    for number in range(MAX_QUESTIONS_PER_HOUR):
+        context = json.dumps({"http": {"sourceIp": f"203.0.113.{number}"}})
+        response = client.post("/ask/stream", json={"question": "hi"}, headers={"x-amzn-request-context": context})
+        assert response.status_code == 200  # Different visitors don't use up each other's limit

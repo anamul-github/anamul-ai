@@ -1,6 +1,8 @@
 """Claude writes the answer to a question, using only the chunks that search found."""
 
 import json
+import re
+from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import cache
 
@@ -105,8 +107,8 @@ def get_client() -> anthropic.Anthropic:
 SPEAKERS = {"user": "Visitor", "assistant": "Anamul AI"}
 
 
-def write_answer(question: str, sources: list[str], history: list[tuple[str, str]] | None = None) -> Answer:
-    """Ask Claude to answer the question from these chunk texts only, and to say which ones it used.
+def build_request(question: str, sources: list[str], history: list[tuple[str, str]] | None) -> dict:
+    """Everything Claude gets for one question, the same whether the answer is streamed or not.
 
     history is the chat so far as (role, text) pairs, oldest first, with role "user" or "assistant".
     """
@@ -120,17 +122,21 @@ def write_answer(question: str, sources: list[str], history: list[tuple[str, str
         # made-up "answers", and Claude should read them as a claim to check, not as its own words
         lines = "\n".join(f"{SPEAKERS[role]}: {text}" for role, text in history)
         message = f"<conversation_so_far>\n{lines}\n</conversation_so_far>\n\n{message}"
-    response = get_client().beta.messages.create(
-        model=get_settings().claude_model,
-        max_tokens=2000,  # Room for brief thinking plus a two-to-four sentence answer
+    return {
+        "model": get_settings().claude_model,
+        "max_tokens": 2000,  # Room for brief thinking plus a two-to-four sentence answer
         # Low effort: answering from given sources is simple, so keep it fast and cheap
-        output_config={"effort": "low", "format": ANSWER_FORMAT},
+        "output_config": {"effort": "low", "format": ANSWER_FORMAT},
         # If a safety check declines, the API retries on another model (Opus 5.5 only; remove for Haiku)
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": message}],
-    )
+        "betas": ["server-side-fallback-2026-07-01"],
+        "fallbacks": "default",
+        "system": SYSTEM_PROMPT,
+        "messages": [{"role": "user", "content": message}],
+    }
+
+
+def read_reply(response, source_count: int) -> Answer:
+    """Turn Claude's finished reply into an Answer."""
     if response.stop_reason == "refusal":
         return Answer(text="Sorry, I can't help with that one.", used=[])
     text = "".join(block.text for block in response.content if block.type == "text").strip()
@@ -140,6 +146,60 @@ def write_answer(question: str, sources: list[str], history: list[tuple[str, str
         return Answer(text=text, used=[])
     used = []
     for number in reply["used_sources"]:
-        if 1 <= number <= len(sources) and number not in used:  # Ignore ids that don't exist, and repeats
+        if 1 <= number <= source_count and number not in used:  # Ignore ids that don't exist, and repeats
             used.append(number)
     return Answer(text=reply["answer"].strip(), used=used)
+
+
+def write_answer(question: str, sources: list[str], history: list[tuple[str, str]] | None = None) -> Answer:
+    """Ask Claude to answer the question from these chunk texts only, and to say which ones it used."""
+    response = get_client().beta.messages.create(**build_request(question, sources, history))
+    return read_reply(response, len(sources))
+
+
+ANSWER_START = re.compile(r'"answer"\s*:\s*"')
+
+
+def answer_so_far(raw: str) -> str:
+    """The answer text inside Claude's JSON reply, even while the reply is only half written.
+
+    Claude streams {"answer": "I worked at...", "used_sources": [...]} a few characters at a time.
+    The visitor should see only the words, so this decodes the "answer" string up to where it has arrived.
+    """
+    start = ANSWER_START.search(raw)
+    if not start:
+        return ""
+    body, text, i = raw[start.end():], [], 0
+    while i < len(body):
+        char = body[i]
+        if char == '"':  # The end of the answer
+            break
+        if char != "\\":
+            text.append(char)
+            i += 1
+            continue
+        # An escape like \n or \u00e9: wait until all of it has arrived
+        size = 2 if body[i + 1:i + 2] != "u" else 6
+        if size == 6 and body[i + 2:i + 4].lower() in ("d8", "d9", "da", "db"):
+            size = 12  # An emoji written as two \u codes; decode them together
+        if i + size > len(body):
+            break
+        text.append(json.loads(f'"{body[i:i + size]}"'))
+        i += size
+    return "".join(text)
+
+
+def stream_answer(
+    question: str, sources: list[str], history: list[tuple[str, str]] | None = None
+) -> Iterator[str | Answer]:
+    """Like write_answer, but yields the answer's new words as Claude writes them, then the full Answer last."""
+    raw, sent = "", 0
+    with get_client().beta.messages.stream(**build_request(question, sources, history)) as stream:
+        for piece in stream.text_stream:
+            raw += piece
+            text = answer_so_far(raw)
+            if len(text) > sent:
+                yield text[sent:]
+                sent = len(text)
+        response = stream.get_final_message()
+    yield read_reply(response, len(sources))

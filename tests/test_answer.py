@@ -62,3 +62,32 @@ def test_a_reply_that_is_not_json_is_shown_as_it_is(claude_says):
     reply = answer.write_answer("hi", [])
     assert reply.text == "Hi there!"
     assert reply.used == []
+
+
+def test_the_answer_is_read_from_half_written_json():
+    assert answer.answer_so_far('{"answer": "I worked') == "I worked"
+    assert answer.answer_so_far('{"answ') == ""
+    assert answer.answer_so_far('{"answer": "Line one\\nLine two \\"quoted\\"", "used') == 'Line one\nLine two "quoted"'
+
+
+def test_an_escape_is_held_back_until_it_has_fully_arrived():
+    assert answer.answer_so_far('{"answer": "caf\\u00') == "caf"
+    assert answer.answer_so_far('{"answer": "caf\\u00e9') == "café"
+
+
+def test_streaming_yields_only_the_answer_words_then_the_answer(monkeypatch):
+    pieces = ['{"ans', 'wer": "I wor', 'ked at OATI."', ', "used_sources": [1]}']
+    final = SimpleNamespace(stop_reason="end_turn", content=[SimpleNamespace(type="text", text="".join(pieces))])
+
+    class FakeStream:
+        text_stream = iter(pieces)
+        def __enter__(self): return self
+        def __exit__(self, *error): return False
+        def get_final_message(self): return final
+
+    client = SimpleNamespace(beta=SimpleNamespace(messages=SimpleNamespace(stream=lambda **request: FakeStream())))
+    monkeypatch.setattr(answer, "get_client", lambda: client)
+    monkeypatch.setattr(answer, "get_settings", lambda: SimpleNamespace(claude_model="a-model"))
+    items = list(answer.stream_answer("What did you do at OATI?", ["chunk"]))
+    assert items[:-1] == ["I wor", "ked at OATI."]
+    assert items[-1] == answer.Answer(text="I worked at OATI.", used=[1])

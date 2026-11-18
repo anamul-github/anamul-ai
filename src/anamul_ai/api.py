@@ -7,16 +7,18 @@ import json
 import re
 import time
 from collections import defaultdict, deque
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Literal
 
 import anthropic
 import voyageai
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from anamul_ai.answer import write_answer
+from anamul_ai.answer import Answer, stream_answer, write_answer
 from anamul_ai.chats import save_chat, save_feedback
 from anamul_ai.embed import embed_query, load_embeddings, similarity
 
@@ -199,20 +201,36 @@ def search_text(question: str, history: list[Turn]) -> str:
     return f"{previous}\n{question}" if previous else question
 
 
-@app.post("/ask")
-def ask(request: AskRequest, http: Request) -> AskResponse:
-    """Answer a question about me with Claude, using only the closest chunks, and return the sources."""
-    check_rate_limit(http.client.host if http.client else "unknown")
-    history = [(turn.role, turn.text) for turn in request.history]
-    try:
-        results = find_chunks(search_text(request.question, request.history))
-        # With no close chunks, Claude can still greet or chat, but the system prompt stops it from stating facts
-        reply = write_answer(request.question, [result.chunk.text for result in results], history)
-    except (anthropic.APIError, voyageai.error.VoyageError):
-        # Claude or Voyage is down or rate-limited: a polite 503 instead of a crash
-        raise HTTPException(status_code=503, detail="The answer service is busy right now. Please try again in a minute.")
+BUSY = "The answer service is busy right now. Please try again in a minute."
 
-    # Only the sources Claude says it used, not everything search found
+
+def visitor_ip(http: Request) -> str:
+    """The visitor's IP address, for the rate limit.
+
+    On Lambda, the web adapter forwards every request from inside the container, so the address
+    the app sees is always the adapter's own. The real one is in the request details it passes along.
+    """
+    context = http.headers.get("x-amzn-request-context")
+    if context:
+        try:
+            return json.loads(context)["http"]["sourceIp"]
+        except (ValueError, KeyError, TypeError):
+            pass
+    return http.client.host if http.client else "unknown"
+
+
+def find_sources(request: AskRequest, http: Request) -> list[SearchResult]:
+    """The steps before Claude: check the rate limit, then search my chunks."""
+    check_rate_limit(visitor_ip(http))
+    try:
+        return find_chunks(search_text(request.question, request.history))
+    except voyageai.error.VoyageError:
+        # Voyage is down or rate-limited: a polite 503 instead of a crash
+        raise HTTPException(status_code=503, detail=BUSY)
+
+
+def finish(request: AskRequest, results: list[SearchResult], reply: Answer) -> AskResponse:
+    """Keep only the sources Claude says it used (not everything search found), and save the chat."""
     sources = []
     for number in reply.used:
         chunk = results[number - 1].chunk
@@ -223,6 +241,45 @@ def ask(request: AskRequest, http: Request) -> AskResponse:
         request.question, reply.text, [source.section for source in sources], last_question(request.history)
     )
     return AskResponse(question=request.question, answer=reply.text, sources=sources, chat_id=chat_id)
+
+
+def history_pairs(request: AskRequest) -> list[tuple[str, str]]:
+    return [(turn.role, turn.text) for turn in request.history]
+
+
+@app.post("/ask")
+def ask(request: AskRequest, http: Request) -> AskResponse:
+    """Answer a question about me with Claude, using only the closest chunks, and return the sources."""
+    results = find_sources(request, http)
+    try:
+        # With no close chunks, Claude can still greet or chat, but the system prompt stops it from stating facts
+        reply = write_answer(request.question, [result.chunk.text for result in results], history_pairs(request))
+    except anthropic.APIError:
+        raise HTTPException(status_code=503, detail=BUSY)
+    return finish(request, results, reply)
+
+
+@app.post("/ask/stream")
+def ask_stream(request: AskRequest, http: Request) -> StreamingResponse:
+    """Like /ask, but sends the answer a few words at a time, so visitors see it being written.
+
+    The reply is one JSON object per line: {"type": "text", "text": ...} for each new piece, then
+    {"type": "done", ...} with the final answer and sources, or {"type": "error", "detail": ...}.
+    """
+    results = find_sources(request, http)  # Rate limit and search errors still get normal status codes
+
+    def events() -> Iterator[str]:
+        try:
+            for item in stream_answer(request.question, [result.chunk.text for result in results], history_pairs(request)):
+                if isinstance(item, Answer):
+                    # The final answer replaces the streamed words, in case they differ (like after a refusal)
+                    yield json.dumps({"type": "done", **finish(request, results, item).model_dump()}) + "\n"
+                else:
+                    yield json.dumps({"type": "text", "text": item}) + "\n"
+        except anthropic.APIError:
+            yield json.dumps({"type": "error", "detail": BUSY}) + "\n"
+
+    return StreamingResponse(events(), media_type="application/x-ndjson")
 
 
 class FeedbackRequest(BaseModel):
