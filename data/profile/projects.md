@@ -44,8 +44,18 @@ My website and blog, with a publishing system and serverless API I built from sc
 
 ## Anamul AI (this chatbot)
 
-November 2026. Status: in progress. Code: https://github.com/anamul-github/anamul-ai
+Software Engineer, 2026 – present. Status: beta. Chat: https://www.anamulhasan.com/chat. Code: https://github.com/anamul-github/anamul-ai
 
-A chatbot that answers questions about me (my resume, projects, articles and book notes), with sources. I'm building it in 30 days, in November 2026, to learn Python, FastAPI, the Claude API, RAG with PostgreSQL + pgvector, LangGraph and AWS by doing.
+An AI version of me that answers questions about my work, projects, and writing, using my own words as its source.
 
-**Tech:** Python, FastAPI, Claude API, PostgreSQL + pgvector, LangGraph, AWS
+**Why I built it:** Visitors and recruiters often have questions my pages don't answer directly. I also wanted to learn Python, applied AI, and AWS by building something real, one hour a day for 30 days.
+
+**What I built:**
+- A Python and FastAPI service that splits my resume, articles, and book notes into small sections, then finds the ones closest in meaning to each question (RAG with Voyage AI embeddings).
+- Answers written by Claude in my voice, from those sections only. If my writing doesn't cover a question, it says so instead of guessing.
+- A deployment on AWS Lambda from a Docker image, with a question limit per visitor and API keys kept out of the code.
+- The chat page and floating chat bubble on this site, plus 25 automated tests for the service.
+
+**What I learned:** Real questions teach more than any plan. The first live "hi" got a long list of facts nobody asked for, so now I improve the bot from how people actually use it. And it can only be as good as the writing I give it.
+
+**Tech:** Python, FastAPI, Claude API, RAG, Voyage AI, Docker, AWS Lambda

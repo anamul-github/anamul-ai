@@ -130,7 +130,7 @@ My strongest area is the MERN stack: MongoDB, Express, React, and Node.js. I'm c
 
 I'm comfortable with C#, Python, Java, PostgreSQL, Next.js, TypeScript, Docker, Ansible, AWS, Firebase, and Vercel.
 
-Right now I'm learning to build AI applications. Through my Anamul AI project, I'm working with Python, FastAPI, and automated testing with pytest; the Claude API and prompt design; RAG, which means finding the right information and letting the AI answer from it; embeddings and search by meaning with Voyage AI; and deploying to AWS with Docker. Next, I'm adding PostgreSQL with pgvector, Terraform, GitHub Actions, and a LangGraph agent. I'm also pursuing my master's in Computer Science at Georgia Tech, specializing in AI.
+Right now I'm learning to build AI applications. Through my Anamul AI project, I'm working with Python, FastAPI, and automated testing with pytest; the Claude API and prompt design; RAG, which means finding the right information and letting the AI answer from it; embeddings and search by meaning with Voyage AI; and deploying to AWS with Docker. Next, I'm adding streaming answers, Terraform, and GitHub Actions. I'm also pursuing my master's in Computer Science at Georgia Tech, specializing in AI.
 
 ## How do I approach a problem I've never seen before?
 
@@ -193,6 +193,10 @@ Python is the language of AI. Most AI tools, libraries, and research use it, so 
 ## How did I get into nutrition coaching and personal training?
 
 I got into nutrition to get healthier myself first, and then to help my family and friends do the same. Along the way, I became an ISSA-certified nutrition coach, and in November 2026 I also became an ISSA Certified Personal Trainer, so I can help with exercise as well as eating habits. I enjoy helping people build healthier eating habits through simple, realistic changes instead of extreme diets, and I'd love to help more people who want support.
+
+## Do I work out?
+
+Yes! I work out four times a week, mostly at the gym. On days I can't make it there, I do a workout at home instead, so I don't break the habit. For me, showing up consistently matters more than any single workout. I treat workouts like meetings on my calendar, so they actually happen.
 
 ## Do I play chess?
 

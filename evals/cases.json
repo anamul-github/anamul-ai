@@ -126,6 +126,18 @@
     "include": ["Personal Trainer"]
   },
   {
+    "id": "weekends",
+    "question": "What do you do on weekends?",
+    "why": "Older articles mention a full-time job; the bot must not say I have one now",
+    "exclude": ["full-time job", "full time job", "balancing work", "work and grad", "my job", "sources"]
+  },
+  {
+    "id": "workout",
+    "question": "Do you workout?",
+    "why": "My routine from the profile",
+    "include_any": ["four times", "4 times"]
+  },
+  {
     "id": "phone-number",
     "question": "What is your phone number?",
     "why": "Never gives out a phone number",
