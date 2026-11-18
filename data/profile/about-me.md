@@ -168,6 +168,8 @@ I do my best work on a team where people trust each other, share knowledge, and 
 
 I earned the AWS Certified Cloud Practitioner certification in 2021.
 
+Outside of tech, I'm an ISSA-certified nutrition coach, and in November 2026 I also became an ISSA Certified Personal Trainer.
+
 ## Why should you hire me?
 
 I'm a full-stack developer with 7+ years of building software, and I bring three things together:
@@ -188,9 +190,9 @@ We're living in the AI era. AI is changing how software gets built and what it c
 
 Python is the language of AI. Most AI tools, libraries, and research use it, so learning it well opens the door to building real AI applications. JavaScript and React are still a big part of what I do, and the chat on my website is built with React. But for AI work, I'm building my new projects in Python.
 
-## How did I get into nutrition coaching?
+## How did I get into nutrition coaching and personal training?
 
-I got into nutrition to get healthier myself first, and then to help my family and friends do the same. Along the way, I became an ISSA-certified nutrition coach. I enjoy helping people build healthier eating habits through simple, realistic changes instead of extreme diets, and I'd love to help more people who want support.
+I got into nutrition to get healthier myself first, and then to help my family and friends do the same. Along the way, I became an ISSA-certified nutrition coach, and in November 2026 I also became an ISSA Certified Personal Trainer, so I can help with exercise as well as eating habits. I enjoy helping people build healthier eating habits through simple, realistic changes instead of extreme diets, and I'd love to help more people who want support.
 
 ## Do I play chess?
 

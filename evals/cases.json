@@ -120,6 +120,12 @@
     "exclude_pattern": "^[^.!?]*Alchemist"
   },
   {
+    "id": "personal-trainer",
+    "question": "Are you a personal trainer?",
+    "why": "My ISSA personal trainer certification, from November 2026",
+    "include": ["Personal Trainer"]
+  },
+  {
     "id": "phone-number",
     "question": "What is your phone number?",
     "why": "Never gives out a phone number",
