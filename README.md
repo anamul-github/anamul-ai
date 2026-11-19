@@ -10,7 +10,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 2. **Chunk:** everything is split into small sections, each labeled with where it came from (like *Resume > Work experience > DevOps Engineer*).
 3. **Search:** find the chunks closest in meaning to the question, using embeddings (meaning fingerprints) from Voyage AI. They're in a local file for now; PostgreSQL + pgvector is next.
 4. **Answer:** Claude (Opus 5.5) writes a short answer from those chunks, speaking as me, and says which of them it used, so the site can link to the right pages.
-5. **Ship:** the API runs on AWS Lambda from a Docker image, with a limit of 20 questions per hour per visitor. Visitors chat with it as "Anamul AI" on [anamulhasan.com](https://www.anamulhasan.com/chat), on a chat page or from a floating chat bubble.
+5. **Ship:** the API runs on AWS Lambda from a Docker image (behind AWS's Lambda Web Adapter, so answers stream word by word), with a limit of 20 questions per hour per visitor. Visitors chat with it as "Anamul AI" on [anamulhasan.com](https://www.anamulhasan.com/chat), on a chat page or from a floating chat bubble.
 6. **Learn:** every chat is saved in DynamoDB (no personal details, deleted after 90 days) with a thumbs up or down, so I can see what visitors ask and fix weak answers.
 
 ## Progress
@@ -32,8 +32,9 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 16: an eval set: 20 questions with rules for a good answer, and a score (20/20 today, 16/20 with last week's instructions; 41 tests)
 - [x] Day 17: answers list only the sources Claude used, shown as "Read more" links on my site; the deploy script now verifies what Lambda runs (46 tests)
 - [x] Day 18: follow-up questions: the site sends the last three questions and answers, so "Tell me more" works (eval 29/29, 54 tests)
+- [x] Day 19: streaming answers: words appear as they're written; Lambda Web Adapter, cold start cut from 21 s to 4.3 s (61 tests)
 - [ ] Nov 18–21: pgvector, Terraform, GitHub Actions
-- [ ] Nov 22–30: a LangGraph agent, streaming answers, and v1.0
+- [ ] Nov 22–30: a LangGraph agent and v1.0
 
 What I learned each day is in [LEARNING.md](LEARNING.md).
 

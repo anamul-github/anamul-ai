@@ -234,3 +234,22 @@
 **My answer (2):** Search only sees the words it's given. "Tell me more" doesn't say what it's about, so on its own it would find nothing useful. Adding the previous question, like "What did you do at OATI?", makes the search find the OATI chunks again, so Claude has the facts to say more.
 
 **My answer (3):** The chat comes from the visitor's browser, so anyone can change it. That's why I give it to Claude as a quoted conversation with a rule: it's only there to understand the question, it's never a source of facts. So a fake "$250,000" is just a claim. Claude ignores it, follows my rule about not sharing salary, and offers the coffee chat. I tested this with an eval case and on the live bot.
+
+## Day 19 (Nov 18): Streaming answers, and a cold start that fought back
+- Before, visitors watched three dots until the whole answer was ready. Now words appear as Claude writes them: first words after about a second, the rest flowing in.
+- `POST /ask/stream` sends one small JSON event per line: `text` for each new piece, then `done` with the final answer, sources and chat id (or `error`). `/ask` stays for my evals.
+- Claude replies in a fixed JSON shape, so while it's half written it looks like `{"answer": "I work`. `answer_so_far()` pulls out only the answer words, and waits until escapes like `é` (é) or an emoji have fully arrived. At the end, the website swaps in the final answer, so a refusal or glitch can't leave half an answer on screen.
+- Lambda: Mangum can only send a finished answer, so the bot now runs as a normal web server (uvicorn) behind AWS's Lambda Web Adapter, and the Function URL is in RESPONSE_STREAM mode. Behind the adapter, every request seems to come from inside the container, so the rate limit reads each visitor's real IP from the `x-amzn-request-context` header (a test checks it).
+- Website bug caught before it ran: React runs state updates later, so a "has the answer started?" flag changed before the first update read it, and the first words would have been glued onto the question. Fix: decide first, then update.
+- The cold start fought back. First deploy: 21 s to the first words after the bot sat idle. Lambda's logs showed startup ran past Lambda's 10-second limit, so it started over. Three fixes, measured one at a time:
+  - Precompile Python into the image (Lambda's disk is read-only, so it was recompiling every cold start): 15 s.
+  - Back on AWS's own Lambda Python image (Lambda keeps its layers cached), plus the adapter's async init so a slow start can't time out and restart: 12.7 s.
+  - 2 GB of memory instead of 1 GB (Lambda gives more CPU with more memory): **4.3 s**, faster than the old bot's 6.6 s. Warm answers start in 1.1–1.3 s.
+- Lesson: measure, read the logs, change one thing, measure again. Each fix had its own number.
+- The 2 GB setting was changed directly in AWS, so Terraform needs to record it. 61 tests.
+
+**My answer (1):** Before, the visitor watched three dots until the whole answer was ready, then it appeared all at once. Now the first words show up after about a second and the rest flows in, like someone typing. The full answer takes about the same time, but people start reading right away instead of waiting. That's what makes it feel faster.
+
+**My answer (2):** Claude replies in a fixed JSON shape, so while it's half written it's messy text with quote marks around it. My bot has a small function that pulls only the answer words out of that half-written JSON and sends just those. At the end, the bot sends the finished answer with its sources, and the website swaps that in, so nothing broken stays on screen.
+
+**My answer (3):** With the new Lambda Web Adapter, every request reaches my app from inside the container, so they all look like the same visitor. Without a fix, after 20 questions from anyone, everyone would be blocked. The adapter passes the real request details in a header (`x-amzn-request-context`), so my bot reads each visitor's real IP from there, and a test checks it.
