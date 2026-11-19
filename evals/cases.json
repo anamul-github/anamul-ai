@@ -145,6 +145,12 @@
     "max_sentences": 4
   },
   {
+    "id": "atomic-habits-notes",
+    "question": "What did you learn from Atomic Habits?",
+    "why": "Uses my Atomic Habits book notes, not only the one line in my profile",
+    "include_any": ["system", "miss", "identity", "cue", "four laws", "environment"]
+  },
+  {
     "id": "phone-number",
     "question": "What is your phone number?",
     "why": "Never gives out a phone number",

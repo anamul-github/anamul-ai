@@ -6,54 +6,60 @@ url: https://www.anamulhasan.com/articles/baby-level-productivity
 
 # Baby Level Productivity: Essential Productive Habits Everyone Should Have
 
-By Anamul Hasan, published 24 October, 2024. Category: Productivity 🚀
+By Anamul Hasan, published 15 November, 2026. Category: Productivity 🚀
 
-##### Introduction:
+## Introduction
 
 Have you ever felt stuck when trying to be more productive?
 
-In today’s world, staying organized and productive is easier than ever. To achieve this, we just need to start with a few simple habits and use tools that help us manage tasks better. These are the most basic habits and tools that everyone should use. As we explore these habits, we'll see how they can make a big difference in our everyday lives.
+I wrote the first version of this article in October 2024. I called it "baby level productivity" because the habits were simple: put everything on a calendar, keep a to-do list, check email in batches, and keep your files in the cloud. Nothing fancy, just the basics I wish someone had told me earlier.
 
-##### 1. Google Calendar App
+When I read it again in 2026, I wondered if it was already outdated. A lot has changed in two years. Now almost everyone has an AI assistant on their phone that can plan, write, and summarize in seconds. But the more I thought about it, the more I realized the basics still matter. AI can help you, but it can't help much if your whole day lives only in your head.
 
-We should block everything in our calendar. Don’t try to keep everything in your head—you can’t remember it all, and your mind won’t appreciate the clutter! Free up your mental space by adding everything to your calendar. For me, if anything is not in my calendar, that means it doesn't exist. You can plan and organize your entire week by setting time blocks for each task or event.
+So this update keeps the same four habits and adds one small, simple way AI can help with each of them. Nothing complicated. This is still baby level. I'm planning intermediate and advanced levels next, and that's where the fancy stuff will go.
 
-You don’t have to use Google Calendar specifically; pick any app that suits you best. Remember, plans can always change. Adjust your schedule as needed—but make sure to reschedule tasks rather than simply removing them. It’s also wise to leave some empty blocks in your schedule to accommodate unexpected adjustments. If no adjustments are needed, treat yourself during those free blocks—**do something you enjoy**!
+## 1. Calendar: if it's not there, it doesn't exist
 
-##### 2. To-Do List
+We should block everything in our calendar. Don't try to keep everything in your head—you can't remember it all, and your mind won't appreciate the clutter. For me, if something is not in my calendar, it basically doesn't exist.
 
-Listing everything you need to do is a simple yet effective way to organize your day. Start by writing down all your tasks, either in order of importance or with the most critical task at the top. Use any app to stay organized. If you’re a procrastinator like me, try using both an **app** and **sticky notes** so you can see your tasks at your desk or wherever you spend most of your time.
+When I was managing two Georgia Tech classes, I planned four study blocks every week, about 20 hours in total. Seeing those blocks on my calendar made a busy week feel possible instead of scary.
 
-###### Daily Highlight
+You don't have to use Google Calendar. Pick any app that works for you. Plans will change, so move tasks to a new time instead of simply deleting them. And leave a few empty blocks for surprises. If no surprise shows up, enjoy that free time—you earned it.
 
-I came across this concept in the book '***Make Time'*** by *Jake Knapp* and *John Zeratsky*. It emphasizes choosing a single focus for the day. **Your daily highlight should be the most important or meaningful task you aim to accomplish**. This approach helps you boost focus, achieve goals, be proactive, and feel more accomplished. It may sound simple, but it’s proven to be highly effective in the long run.
+**A little help from AI:** if planning your week feels overwhelming, write down your tasks and ask an AI assistant to suggest a weekly schedule. It's a good starting point. But the plan only works once it's on your calendar and you actually follow it. AI can make the plan, but it can't show up for you.
 
-###### Time & Location method
+## 2. To-do list and the daily highlight
 
-To make this even more effective, use the time and location formula from *James Clear*’s book '***Atomic Habits'***. Specify exactly when and where you’ll work on your daily highlight, and add it to your to-do list and calendar. For example, instead of saying, "I'll work on my report," say, "**I’ll work on my report at 9 AM at my desk.**" This makes your commitment clear and increases the chances of following through.
+Writing down everything you need to do is still one of the simplest ways to organize your day. Put the most important task at the top. If you're a procrastinator like me, use both an app and a sticky note on your desk, so the task keeps looking at you.
 
-By creating a prioritized **to-do list** and setting a clear **daily highlight** with **time and location**, we can stay focused, make consistent progress, and manage our day more effectively.
+### Daily highlight
 
-##### 3. Email
+I learned this idea from the book *Make Time* by Jake Knapp and John Zeratsky. Every day, choose one main focus: the task that would make you feel the day was worth it. It sounds almost too simple, but it works because it forces you to choose.
 
-Everyone uses email, but managing it efficiently is key to stay productive. We often find ourselves overwhelmed by a cluttered inbox. There’s a simple habit that can help: set specific times in your schedule to check and respond to emails. Instead of keeping your inbox open all day, create time blocks—maybe once in the morning and once in the afternoon—to handle emails in batches.
+### Time and location
 
-Use folders, labels, or categories to organize your inbox and make it easier to find important emails. Don’t forget to unsubscribe from unwanted newsletters and spam that can clutter your inbox. **If an email requires a response that takes more than a couple of minutes, add it to your to-do list** instead of trying to tackle it immediately.
+To make the highlight stick, I use the time and location idea from *Atomic Habits* by James Clear. Instead of saying "I'll work on my report," say "I'll work on my report at 9 AM at my desk." Then add it to your to-do list and your calendar. This makes your commitment clear and increases the chances of following through.
 
-Remember, the goal is to prevent email from becoming a constant distraction. By dedicating focused time for emails and keeping your inbox organized, we can maintain a clear mind and stay on top of our tasks.
+**A little help from AI:** when a task feels too big, AI is great at breaking it into small steps. "Write my report" can become "make an outline, write the introduction, add the numbers," and suddenly it feels doable. But be careful. AI is also happy to give you fifteen priorities in two seconds, and fifteen priorities is the same as no priority. Choosing your one daily highlight is still your job.
 
-##### 4. File Management System
+## 3. Email: check it on a schedule
 
-Keeping your files organized in the cloud is not just convenient; it's essential for staying productive and prepared. Storing important documents like resumes, reports, or personal notes in the cloud means you can access them anytime, anywhere—whether on your laptop, phone, or any other device. Without cloud storage, you’d need the specific device where the files are saved. But with cloud-based storage, you can edit, delete, or update documents from any device simply by logging in.
+Everyone uses email, but managing it well is key to staying productive. Don't keep your inbox open all day. Set specific times to check it, maybe once in the morning and once in the afternoon, and handle messages in batches. Use labels or folders, unsubscribe from newsletters you never read, and if a reply needs more than a couple of minutes, add it to your to-do list instead of doing it right away.
 
-Imagine this: you meet someone unexpectedly who offers a great job opportunity and asks for your resume. If it’s not saved in the cloud, you might miss the opportunity simply because it’s not readily available. It shows a lack of preparation. Keeping your files in the cloud means you're always prepared and won't miss out because you can't access them. You can easily log in to your **Google Drive** with your phone anytime, anywhere in the world to get what you need.
+**A little help from AI:** if a reply feels hard to start, ask AI for a first draft, then edit it so it sounds like you. Always read it before you hit send. AI writes fast, but your name is the one at the bottom of the email.
 
-Using cloud-based tools like **Google Docs** or similar apps can be a game-changer for note-taking as well. Whether it’s work notes, class lectures, or personal reminders, keeping them in the cloud allows for easy access and updates. Picture yourself on a bus, wanting to review your notes—you can simply log in, find your document, and start reading, no matter what device you're using.
+## 4. Files in the cloud: be ready anytime
 
-With cloud storage, you’re not just organizing files; you’re creating flexibility and readiness in your life. It keeps you prepared for opportunities, enhances productivity, and ensures that important information is always just a few clicks away.
+Keeping your important files in the cloud is still one of the easiest ways to stay prepared. Imagine you meet someone unexpectedly who offers a great opportunity and asks for your resume. If it's only saved on your laptop at home, you might miss that chance. With Google Drive or a similar app, you can open it from your phone in a minute, anywhere in the world.
 
-##### Conclusion
+The same goes for notes. Whether it's work notes, class lectures, or personal reminders, keeping them in the cloud means you can review them anytime—even on the bus.
 
-Building good productivity habits doesn’t have to be complicated. By implementing simple tools like a calendar app, to-do list, email management, and a cloud-based file system, we can organize our daily lives more effectively. Each of these habits offers a basic but powerful way to manage tasks, improve focus, and stay prepared.
+**A little help from AI:** clear folder and file names make everything easier, for you and for any AI tool you use later. "Resume\_2026.pdf" in a folder called "Career" is easy to find. "final\_final\_v3.pdf" on your desktop is not. Organized files are a boring habit, but it pays off when you start using more advanced tools.
 
-Remember, **the goal isn’t perfection, but consistent progress**. Start small, stay committed, and adjust as needed. Whether it’s blocking time in your schedule, prioritizing tasks, managing emails, or keeping files accessible, each step you take brings you closer to a more organized and productive life. Let’s make these habits a part of our routine and experience the lasting boost in productivity!
+## Conclusion
+
+Building good productivity habits doesn't have to be complicated. A calendar, a to-do list with one daily highlight, email on a schedule, and files in the cloud. That's it. These were the basics in 2024, and they're still the basics in 2026.
+
+AI can make each habit a little easier, but it doesn't replace them. Without the habits, AI mostly helps you stay disorganized, just faster.
+
+##### Once these habits feel normal, you're ready for the next level. In my intermediate article, I'll share how to turn these habits into simple systems and connect AI to them.
