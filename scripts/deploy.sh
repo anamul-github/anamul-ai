@@ -26,3 +26,9 @@ if [ "$RUNNING" != "${REPOSITORY}@${DIGEST}" ]; then
   exit 1
 fi
 echo "Deployed: Lambda is running the new image (${DIGEST:7:12})."
+
+# The first start of a brand-new image is slow (up to ~20 s) while Lambda caches it. Pay that here with one
+# request, instead of making the first visitor wait.
+URL=$(aws lambda get-function-url-config --function-name anamul-ai --region "$REGION" --query FunctionUrl --output text)
+SECONDS_TAKEN=$(curl -s -o /dev/null -w "%{time_total}" --max-time 60 "$URL")
+echo "Warmed up: the first request took ${SECONDS_TAKEN%.*} s."
