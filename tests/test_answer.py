@@ -89,5 +89,12 @@ def test_streaming_yields_only_the_answer_words_then_the_answer(monkeypatch):
     monkeypatch.setattr(answer, "get_client", lambda: client)
     monkeypatch.setattr(answer, "get_settings", lambda: SimpleNamespace(claude_model="a-model"))
     items = list(answer.stream_answer("What did you do at OATI?", ["chunk"]))
-    assert items[:-1] == ["I wor", "ked at OATI."]
+    # Nothing until there are three whole words, and never half a word; the full answer comes last
+    assert items[:-1] == ["I worked at"]
     assert items[-1] == answer.Answer(text="I worked at OATI.", used=[1])
+
+
+def test_only_whole_words_are_shown():
+    assert answer.whole_words("Hi! I'm Anam") == "Hi! I'm"
+    assert answer.whole_words("H") == ""
+    assert answer.whole_words("Line one\nLin") == "Line one"

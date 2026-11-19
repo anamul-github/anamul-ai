@@ -189,6 +189,15 @@ def answer_so_far(raw: str) -> str:
     return "".join(text)
 
 
+MIN_FIRST_WORDS = 3
+
+
+def whole_words(text: str) -> str:
+    """The text up to its last complete word, so a visitor never sees half a word like "Anam"."""
+    end = max(text.rfind(" "), text.rfind("\n"))
+    return text[:end] if end > 0 else ""
+
+
 def stream_answer(
     question: str, sources: list[str], history: list[tuple[str, str]] | None = None
 ) -> Iterator[str | Answer]:
@@ -197,9 +206,13 @@ def stream_answer(
     with get_client().beta.messages.stream(**build_request(question, sources, history)) as stream:
         for piece in stream.text_stream:
             raw += piece
-            text = answer_so_far(raw)
-            if len(text) > sent:
-                yield text[sent:]
-                sent = len(text)
+            ready = whole_words(answer_so_far(raw))
+            # Claude's first piece can be a single letter ("H"), then a pause: a lone "H" looks broken,
+            # so the visitor keeps seeing the dots until there are a few words to show
+            if sent == 0 and len(ready.split()) < MIN_FIRST_WORDS:
+                continue
+            if len(ready) > sent:
+                yield ready[sent:]
+                sent = len(ready)
         response = stream.get_final_message()
     yield read_reply(response, len(sources))
