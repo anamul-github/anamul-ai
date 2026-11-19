@@ -2,7 +2,7 @@
 
 import json
 
-from anamul_ai.evals import CASES_FILE, check, count_sentences
+from anamul_ai.evals import CASES_FILE, check, count_sentences, longest_sentence
 
 
 def test_a_good_answer_passes():
@@ -46,3 +46,12 @@ def test_every_case_has_a_question_and_at_least_one_rule():
     assert len({case["id"] for case in cases}) == len(cases)  # No duplicate ids
     for case in cases:
         assert case["question"] and rules & set(case), case["id"]
+
+
+def test_the_longest_sentence_is_counted_in_words():
+    assert longest_sentence("Hi! I'm Anamul's AI avatar. What would you like to know?") == 6
+
+
+def test_a_very_long_sentence_fails():
+    long_answer = "I " + "really " * 30 + "like cricket."
+    assert any("hard to read" in problem for problem in check(long_answer, {}))

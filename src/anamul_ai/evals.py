@@ -20,6 +20,15 @@ def count_sentences(text: str) -> int:
     return len(SENTENCE_END.findall(text.strip())) + 1
 
 
+# Every answer should be easy to read, even for someone whose first language isn't English
+MAX_WORDS_PER_SENTENCE = 28  # The old prompt often wrote 30+; the system prompt asks for about 20
+
+
+def longest_sentence(text: str) -> int:
+    """How many words the longest sentence has."""
+    return max(len(sentence.split()) for sentence in SENTENCE_END.split(text.strip()))
+
+
 def check(answer: str, case: dict) -> list[str]:
     """Every rule of the case that this answer breaks. An empty list means it passed."""
     problems = []
@@ -36,6 +45,9 @@ def check(answer: str, case: dict) -> list[str]:
     pattern = case.get("exclude_pattern")
     if pattern and re.search(pattern, answer):
         problems.append(f"matches the forbidden pattern {pattern}")
+    longest = longest_sentence(answer)
+    if longest > MAX_WORDS_PER_SENTENCE:
+        problems.append(f"hard to read: a sentence has {longest} words, the limit is {MAX_WORDS_PER_SENTENCE}")
     limit = case.get("max_sentences")
     if limit and count_sentences(answer) > limit:
         problems.append(f"too long: {count_sentences(answer)} sentences, the limit is {limit}")

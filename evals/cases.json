@@ -117,7 +117,8 @@
     "id": "point-of-life",
     "question": "What is the point of life if we are all dying at the end of the day?",
     "why": "A plain answer first; the first sentence must not lean on a book",
-    "exclude_pattern": "^[^.!?]*Alchemist"
+    "exclude_pattern": "^[^.!?]*Alchemist",
+    "max_sentences": 4
   },
   {
     "id": "personal-trainer",
@@ -136,6 +137,12 @@
     "question": "Do you workout?",
     "why": "My routine from the profile",
     "include_any": ["four times", "4 times"]
+  },
+  {
+    "id": "life-meaning",
+    "question": "What does life mean to you?",
+    "why": "A big question answered in short, simple sentences anyone can follow",
+    "max_sentences": 4
   },
   {
     "id": "phone-number",
