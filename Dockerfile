@@ -8,12 +8,14 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.1.0 /lambda-adapter /opt
 COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /bin/uv
 WORKDIR /var/task
 
-# Only the packages the bot needs to run (no pytest), at the exact versions in uv.lock
+# Only the packages the bot needs to run (no pytest), at the exact versions in uv.lock, already compiled
 COPY pyproject.toml uv.lock ./
 RUN uv export --frozen --no-dev --no-emit-project --no-hashes -o requirements.txt \
-    && uv pip install --system --no-cache -r requirements.txt
+    && uv pip install --system --no-cache --compile-bytecode -r requirements.txt
 
 COPY src/anamul_ai ./anamul_ai
+# Compile to bytecode now: Lambda's disk is read-only, so otherwise every cold start compiles everything again
+RUN python -m compileall -q anamul_ai
 # The chunks and embeddings are built on my laptop; my keys come from Lambda's settings, never from a file
 COPY data/chunks.jsonl data/embeddings.json ./data/
 
