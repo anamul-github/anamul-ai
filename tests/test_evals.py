@@ -55,3 +55,8 @@ def test_the_longest_sentence_is_counted_in_words():
 def test_a_very_long_sentence_fails():
     long_answer = "I " + "really " * 30 + "like cricket."
     assert any("hard to read" in problem for problem in check(long_answer, {}))
+
+
+def test_an_answer_may_not_open_with_ha():
+    assert 'starts with "Ha" or "Good question"' in check("Ha, I hope not!", {})
+    assert check("Happy to help!", {}) == []  # "Happy" is fine

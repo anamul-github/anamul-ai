@@ -45,6 +45,8 @@ def check(answer: str, case: dict) -> list[str]:
     pattern = case.get("exclude_pattern")
     if pattern and re.search(pattern, answer):
         problems.append(f"matches the forbidden pattern {pattern}")
+    if re.match(r"(ha|good question)\b", answer.strip(), re.IGNORECASE):
+        problems.append('starts with "Ha" or "Good question"')
     longest = longest_sentence(answer)
     if longest > MAX_WORDS_PER_SENTENCE:
         problems.append(f"hard to read: a sentence has {longest} words, the limit is {MAX_WORDS_PER_SENTENCE}")
