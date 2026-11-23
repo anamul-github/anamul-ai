@@ -270,3 +270,18 @@
 **My answer (2):** Each answer is written on its own. Claude doesn't see how its other answers started, so it can't know whether it's repeating itself, and "vary" means nothing to it. A clear rule like "don't start with Ha" works in every single answer. Now my eval checks it too.
 
 **My answer (3):** The coffee chat is for conversations worth having, like work, skills and career. Booking a call to find out if I can swim would be silly. So small personal gaps just get a light "I haven't shared that here yet", and work questions the bot can't answer still point people to a real chat with me.
+
+## Day 21 (Nov 22): My AWS setup as code, with Terraform
+- Until today my AWS setup lived only in the console, built by clicks and commands over Days 12–19. The 2 GB memory and streaming URL mode from Day 19 were set by hand and written down nowhere.
+- `infra/` now describes all of it in Terraform: the ECR repository, the DynamoDB chats table (90-day auto-delete), the IAM role and its two policies, the Lambda function (arm64, 2 GB, 60 s), its public URL in streaming mode, the two public-access permissions, and the log group.
+- The resources already existed, so `imports.tf` has one `import` block per resource: "this exists, adopt it, don't create a copy".
+- The first `terraform plan` said "5 to change": only a `project` label I'd asked for everywhere. I removed it so the first apply would only adopt, not change. Then: **10 to import, 0 to add, 0 to change, 0 to destroy**.
+- I saved that plan to a file and applied exactly that plan. After it, `terraform plan` says "No changes. Your infrastructure matches the configuration." The live bot never restarted.
+- The Lambda's image and API keys are marked `ignore_changes`: deploy.sh and set_lambda_keys.sh handle those. The state file is gitignored, because it holds a copy of the Lambda's settings, keys included. I never printed a full plan, only the summary lines.
+- Installed Terraform 1.17.2 from HashiCorp's Homebrew tap (AWS provider 6.73).
+
+**My answer (1):** `terraform plan` compares my Terraform files with what really exists in AWS, and lists what it would add, change or delete, without touching anything. My setup was already built by hand, so I wanted Terraform to adopt it, not change it. "10 to import, 0 to change, 0 to destroy" proved my files described my real setup exactly. If it had said "change" or "destroy", my files would have been wrong, and applying could have broken the live bot.
+
+**My answer (2):** Those two change outside Terraform on purpose. My deploy script sets a new image every time I deploy, and my API keys are set by a separate script so they never go into my public code. If Terraform didn't ignore them, every plan would want to undo my latest deploy. Worse, I'd have to write my keys into the Terraform files.
+
+**My answer (3):** The `.tf` files are my plan for what should exist, with no secrets, so they're safe to share. The state file is Terraform's memory of what it manages, and it stores a full copy of each resource's settings, including the Lambda's API keys. So it stays only on my laptop. Later I could keep it in an encrypted S3 bucket instead.
