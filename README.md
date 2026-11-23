@@ -33,6 +33,7 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 17: answers list only the sources Claude used, shown as "Read more" links on my site; the deploy script now verifies what Lambda runs (46 tests)
 - [x] Day 18: follow-up questions: the site sends the last three questions and answers, so "Tell me more" works (eval 29/29, 54 tests)
 - [x] Day 19: streaming answers: words appear as they're written; Lambda Web Adapter, cold start cut from 21 s to 4.3 s (61 tests)
+- [x] Day 20: the bot stops lecturing: no book or article names unless asked, light replies to teasing, eval cases from a real chat (40/40, 65 tests)
 - [ ] Nov 18–21: pgvector, Terraform, GitHub Actions
 - [ ] Nov 22–30: a LangGraph agent and v1.0
 
@@ -52,5 +53,5 @@ uv run python -m anamul_ai.embed        # Day 9: meaning fingerprints for every 
 ./scripts/deploy.sh                     # Day 12: build the Docker image, push it to ECR, update the Lambda function
 ./scripts/set_lambda_keys.sh            # Day 12: copy the API keys from .env into Lambda (prints nothing secret)
 uv run python -m anamul_ai.chats        # Day 15: read the latest saved chats and their thumbs up/down
-uv run python -m anamul_ai.evals        # Day 16: score the bot on 29 questions (real Claude, about 40 cents)
+uv run python -m anamul_ai.evals        # Day 16: score the bot on 40 questions (real Claude, about 50 cents)
 ```

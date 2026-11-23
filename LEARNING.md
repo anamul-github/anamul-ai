@@ -253,3 +253,20 @@
 **My answer (2):** Claude replies in a fixed JSON shape, so while it's half written it's messy text with quote marks around it. My bot has a small function that pulls only the answer words out of that half-written JSON and sends just those. At the end, the bot sends the finished answer with its sources, and the website swaps that in, so nothing broken stays on screen.
 
 **My answer (3):** With the new Lambda Web Adapter, every request reaches my app from inside the container, so they all look like the same visitor. Without a fix, after 20 questions from anyone, everyone would be blocked. The adapter passes the real request details in a header (`x-amzn-request-context`), so my bot reads each visitor's real IP from there, and a test checks it.
+
+## Day 20 (Nov 22): The bot stops lecturing
+- I chatted with my own bot like a visitor would, and it got preachy: 6 of 9 answers ended with "an idea I took from Atomic Habits" or "I wrote about this in…". When I teased it ("are you a loser?"), it gave me a lesson from The Alchemist. My last message was "I don't need your lecture!"
+- New rules in the system prompt:
+  - Share ideas from my articles and book notes as my own view. Name a book or article only when someone asks about it, asks for a recommendation, or asks where an idea came from. The "Read more" links already show where it came from.
+  - Teasing gets one or two light, good-humored sentences: no lesson, no advice, no quote, no links.
+  - Small personal gaps ("Can you swim?") get "I haven't shared that here yet", without the coffee chat. The coffee chat stays for work and career questions.
+  - Never start with "Ha" or "Good question".
+- "Vary your openers" didn't work: 5 of 8 answers still started with "Ha". Each answer is written on its own, so Claude can't see how the others started. A plain "don't" works, and the eval now fails any answer that opens with "Ha".
+- 6 eval cases from my real chat (40 cases, 40/40). One first-run failure was my rule again: a short joke plus "What would you like to know?" counted as 3 sentences against a limit of 2. 65 tests.
+- Lesson: talk to your own product like a stranger would. The evals only test what I thought to test.
+
+**My answer (1):** Being right isn't the same as sounding natural. When a friend asks me something, I just answer. I don't say "as I wrote in my book notes" every time. Doing that in every answer felt like a lecture, and a real visitor told me so. The "Read more" links under each answer already show where it came from, so the bot only needs to name a book when someone asks about it.
+
+**My answer (2):** Each answer is written on its own. Claude doesn't see how its other answers started, so it can't know whether it's repeating itself, and "vary" means nothing to it. A clear rule like "don't start with Ha" works in every single answer. Now my eval checks it too.
+
+**My answer (3):** The coffee chat is for conversations worth having, like work, skills and career. Booking a call to find out if I can swim would be silly. So small personal gaps just get a light "I haven't shared that here yet", and work questions the bot can't answer still point people to a real chat with me.
