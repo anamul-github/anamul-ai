@@ -20,8 +20,9 @@ resource "aws_iam_role" "github_deploy" {
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          # Only workflows running on main in my repo: not forks, not other branches
-          "token.actions.githubusercontent.com:sub" = "repo:anamul-github/anamul-ai:ref:refs/heads/main"
+          # Only workflows running on main in my repo: not forks, not other branches. GitHub includes the
+          # permanent IDs of my account and repo, so even a new repo that took the same name couldn't get in.
+          "token.actions.githubusercontent.com:sub" = "repo:anamul-github@108581683/anamul-ai@1443735689:ref:refs/heads/main"
         }
       }
     }]
