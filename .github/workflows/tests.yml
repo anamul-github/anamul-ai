@@ -1,0 +1,23 @@
+# Runs my tests on every push and pull request, so a broken change shows up as a red X on GitHub.
+# The deploy workflow runs these first too. No API keys needed: the tests fake Claude and Voyage.
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      # The API tests read data/chunks.jsonl, which is built from my committed writing
+      - run: uv run python -m anamul_ai.chunk
+      - run: uv run pytest

@@ -1,0 +1,46 @@
+# Deploys the bot to AWS Lambda. I start it myself (Actions tab -> Deploy -> Run workflow), so nothing
+# goes live without me deciding it should. It runs the tests first and deploys only if they pass.
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
+  deploy:
+    needs: tests
+    runs-on: ubuntu-24.04-arm # Same chip type as my Lambda (arm64), so the image builds natively
+    permissions:
+      contents: read
+      id-token: write # Lets GitHub prove to AWS who it is (OIDC), instead of storing AWS keys here
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+
+      - name: Build the chunks, and check every chunk has its embedding
+        run: |
+          uv run python -m anamul_ai.chunk
+          uv run python - <<'PY'
+          import json
+          from anamul_ai.embed import load_embeddings  # The same loader the bot uses
+          ids = [json.loads(line)["id"] for line in open("data/chunks.jsonl")]
+          missing = set(ids) - set(load_embeddings())
+          if missing:
+              raise SystemExit(f"{len(missing)} chunks have no embedding. Run anamul_ai.embed on my laptop and commit data/embeddings.json.")
+          print(f"All {len(ids)} chunks have embeddings.")
+          PY
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-2
+
+      - uses: docker/setup-buildx-action@v4
+
+      # The same script I run on my laptop: build, push, deploy by digest, verify, warm up
+      - run: ./scripts/deploy.sh

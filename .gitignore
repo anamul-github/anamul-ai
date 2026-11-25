@@ -20,7 +20,7 @@ wheels/
 data/chunks.jsonl
 
 # Built by embed.py; rebuild it with: uv run python -m anamul_ai.embed
-data/embeddings.json
+# data/embeddings.json is committed: GitHub's deploy needs it and can't rebuild it without my Voyage key
 
 # Every answer from the last eval run; rebuild it with: uv run python -m anamul_ai.evals
 evals/last_run.json
