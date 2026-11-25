@@ -285,3 +285,19 @@
 **My answer (2):** Those two change outside Terraform on purpose. My deploy script sets a new image every time I deploy, and my API keys are set by a separate script so they never go into my public code. If Terraform didn't ignore them, every plan would want to undo my latest deploy. Worse, I'd have to write my keys into the Terraform files.
 
 **My answer (3):** The `.tf` files are my plan for what should exist, with no secrets, so they're safe to share. The state file is Terraform's memory of what it manages, and it stores a full copy of each resource's settings, including the Lambda's API keys. So it stays only on my laptop. Later I could keep it in an encrypted S3 bucket instead.
+
+## Day 22 (Nov 24): GitHub Actions: tests on every push, and deploys with no AWS keys
+- `.github/workflows/tests.yml` runs my 65 tests on every push and pull request, so a broken change shows a red ✗ on GitHub. No API keys needed: the tests fake Claude and Voyage. I checked first with a clean copy of the repo and no `.env`.
+- `.github/workflows/deploy.yml` is a one-click deploy I start myself (Actions → Deploy → Run workflow). It runs the tests, checks every chunk has its embedding, logs in to AWS, and runs the same `deploy.sh` I use on my laptop, on GitHub's free arm64 runner (the same chip as my Lambda).
+- No AWS keys in GitHub: OIDC. GitHub shows AWS a short-lived token, and AWS hands out temporary credentials. `infra/github.tf` adds the OIDC provider and a deploy role that trusts only my repo's main branch, and can only push to my ECR repo and update my one Lambda.
+- `data/embeddings.json` is now committed (3 MB): GitHub can't rebuild it without my Voyage key. The deploy refuses to run if a chunk is missing its embedding. That check caught a bug in its own first version: it read the file wrong and claimed all 134 were missing.
+- Two failures on the way:
+  - `astral-sh/setup-uv@v10` doesn't exist: that project publishes exact versions only. Pinned to `v10.4.0`. Lesson: check the tag exists, not only that the version is newest.
+  - AWS refused GitHub's token. CloudTrail showed the real subject: `repo:anamul-github@108581683/anamul-ai@1443735689:ref:refs/heads/main`. Repos created after July 15, 2026 get "immutable" subjects with permanent IDs. My repo's OIDC settings page confirmed it. One-line Terraform fix.
+- Deploy #2 worked: tests, AWS login, build, deploy, verify and warm-up, in about a minute. Lambda kept its 2 GB, and the live bot answered in 3.6 s.
+
+**My answer (1):** GitHub shows AWS a short-lived ID token (OIDC) that says "I'm the anamul-ai repo, on the main branch." AWS checks that GitHub really signed it, then hands out temporary credentials that expire within the hour. So there's no long-lasting key that could leak. Even those temporary credentials can only push my bot's image and update my one Lambda function.
+
+**My answer (2):** My AWS role only trusts a token from my repo's main branch, and GitHub puts my account's and repo's permanent ID numbers inside that token. A fork is a different repo with a different ID, so AWS says no. Even a new repo with the same name would have a different ID.
+
+**My answer (3):** AWS refused GitHub's token because my role expected the old format, `repo:anamul-github/anamul-ai`. GitHub now adds the permanent IDs to it. Instead of guessing, we looked in CloudTrail, AWS's log of who tried to sign in, and it showed exactly what the token said. My repo's OIDC settings page confirmed it, so the fix was one line in Terraform.
