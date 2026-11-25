@@ -20,7 +20,7 @@ jobs:
       id-token: write # Lets GitHub prove to AWS who it is (OIDC), instead of storing AWS keys here
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.4.0 # This project publishes exact versions only, no short "v10" tag
 
       - name: Build the chunks, and check every chunk has its embedding
         run: |
