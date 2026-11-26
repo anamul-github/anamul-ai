@@ -52,10 +52,12 @@ An AI version of me that answers questions about my work, projects, and writing,
 
 **What I built:**
 - A Python and FastAPI service that splits my resume, articles, and book notes into small sections, then finds the ones closest in meaning to each question (RAG with Voyage AI embeddings).
-- Answers written by Claude in my voice, from those sections only. If my writing doesn't cover a question, it says so instead of guessing.
-- A deployment on AWS Lambda from a Docker image, with a question limit per visitor and API keys kept out of the code.
-- The chat page and floating chat bubble on this site, plus 25 automated tests for the service.
+- Answers written by Claude in my voice, from those sections only, that appear word by word as they're written. If my writing doesn't cover a question, it says so instead of guessing.
+- An eval set of 40 questions with rules for a good answer, so I can measure every change (40/40 today), plus 65 automated tests.
+- AWS Lambda from a Docker image, with the AWS setup written as code in Terraform and one-click deploys from GitHub Actions, with no AWS keys stored in GitHub.
+- Email alerts for failed answers, crashes, and traffic spikes, a $5 cost budget, and a question limit per visitor.
+- The chat page, the floating chat bubble, and the Ask box on this site's homepage.
 
 **What I learned:** Real questions teach more than any plan. The first live "hi" got a long list of facts nobody asked for, so now I improve the bot from how people actually use it. And it can only be as good as the writing I give it.
 
-**Tech:** Python, FastAPI, Claude API, RAG, Voyage AI, Docker, AWS Lambda
+**Tech:** Python, FastAPI, Claude API, RAG, Voyage AI, Docker, AWS Lambda, Terraform, GitHub Actions

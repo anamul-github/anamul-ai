@@ -6,7 +6,7 @@ url: https://www.anamulhasan.com/about
 
 # About Anamul Hasan
 
-Hello, I am Anamul Hasan, a curious learner with a passion for building meaningful projects through code. I find joy in creating, whether it's developing software, writing thoughtful articles, or sharing knowledge. I'm also an ISSA-certified nutrition coach, because I believe a healthy body supports a sharp mind.
+Hello, I am Anamul Hasan, a curious learner with a passion for building meaningful projects through code. I find joy in creating, whether it's developing software, writing thoughtful articles, or sharing knowledge. I'm also an ISSA-certified personal trainer and nutrition coach, because I believe a healthy body supports a sharp mind.
 
 My goal each day is to learn, grow, and make a positive impact. I also enjoy challenging myself with chess and exploring new places.
 
@@ -16,7 +16,7 @@ I am a thinker. Deep thinking often leads me to unique insights, and I believe t
 
 - **Pursuing my master's at Georgia Tech:** I'm pursuing a Master of Science in Computer Science at Georgia Tech, specializing in Artificial Intelligence. This program allows me to deepen my expertise in Artificial Intelligence and explore its practical applications in building smarter systems.
 
-- **Nutrition coaching:** As an ISSA-certified nutrition coach, I enjoy helping people build healthier eating habits through simple, realistic changes instead of extreme diets. I keep learning about nutrition and fitness so I can practice what I share.
+- **Fitness coaching:** I'm an ISSA-certified personal trainer and nutrition coach. I enjoy helping people get stronger and eat healthier through simple, realistic changes instead of extreme diets or workouts. I keep learning about training and nutrition so I can practice what I share.
 
 - **Improving the website:** I am updating this website by adding features, improving the design, and enhancing user experience. My goal is to make updates monthly, and this is currently one of my favorite activities.
 
@@ -33,7 +33,7 @@ I am a thinker. Deep thinking often leads me to unique insights, and I believe t
 - Career: Full-stack developer, now an MS in CS (AI) student at Georgia Tech
 - This website: Built from scratch in 2024, and now it has its own AI avatar
 - Passion projects: 50+ coding projects, and writing about what I learn
-- Nutrition coach: ISSA-certified, helping people eat healthier with simple changes
+- Fitness coach: ISSA-certified personal trainer and nutrition coach, helping people get stronger and eat healthier
 - Hobbies: Cricket league every summer, and online chess
 - Surprising fact: People think I'm a total nerd, until they see me play cricket
 - Personality: Introverted, but I open up when I feel a genuine connection
