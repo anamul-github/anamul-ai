@@ -258,6 +258,17 @@ def test_the_stream_reports_a_claude_outage_as_an_error_event(monkeypatch):
     assert events[-1]["type"] == "error"
 
 
+def test_a_failed_answer_is_logged_for_my_alarm(monkeypatch, capsys):
+    def broken(question, sources, history=None):
+        raise anthropic.APIConnectionError(request=httpx.Request("POST", "https://api.anthropic.com"))
+        yield  # Makes this a generator, like the real stream_answer
+
+    monkeypatch.setattr("anamul_ai.api.stream_answer", broken)
+    client.post("/ask/stream", json={"question": "hi"})
+    logged = [json.loads(line) for line in capsys.readouterr().out.splitlines() if "answer_failed" in line]
+    assert logged == [{"event": "answer_failed", "service": "claude", "error": "APIConnectionError"}]
+
+
 def test_the_stream_still_has_a_rate_limit(fake_stream):
     for _ in range(MAX_QUESTIONS_PER_HOUR):
         client.post("/ask/stream", json={"question": "hi"})

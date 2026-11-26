@@ -41,7 +41,8 @@ resource "aws_lambda_permission" "url_invoke" {
 }
 
 resource "aws_cloudwatch_log_group" "bot" {
-  name = "/aws/lambda/${aws_lambda_function.bot.function_name}"
+  name              = "/aws/lambda/${aws_lambda_function.bot.function_name}"
+  retention_in_days = 90 # Same as my saved chats; logs used to be kept forever
 }
 
 output "url" {

@@ -204,6 +204,11 @@ def search_text(question: str, history: list[Turn]) -> str:
 BUSY = "The answer service is busy right now. Please try again in a minute."
 
 
+def log_failure(service: str, error: Exception) -> None:
+    """One JSON line per failed answer. CloudWatch counts these lines and emails me if they pile up."""
+    print(json.dumps({"event": "answer_failed", "service": service, "error": type(error).__name__}), flush=True)
+
+
 def visitor_ip(http: Request) -> str:
     """The visitor's IP address, for the rate limit.
 
@@ -224,7 +229,8 @@ def find_sources(request: AskRequest, http: Request) -> list[SearchResult]:
     check_rate_limit(visitor_ip(http))
     try:
         return find_chunks(search_text(request.question, request.history))
-    except voyageai.error.VoyageError:
+    except voyageai.error.VoyageError as error:
+        log_failure("voyage", error)
         # Voyage is down or rate-limited: a polite 503 instead of a crash
         raise HTTPException(status_code=503, detail=BUSY)
 
@@ -254,7 +260,8 @@ def ask(request: AskRequest, http: Request) -> AskResponse:
     try:
         # With no close chunks, Claude can still greet or chat, but the system prompt stops it from stating facts
         reply = write_answer(request.question, [result.chunk.text for result in results], history_pairs(request))
-    except anthropic.APIError:
+    except anthropic.APIError as error:
+        log_failure("claude", error)
         raise HTTPException(status_code=503, detail=BUSY)
     return finish(request, results, reply)
 
@@ -276,7 +283,8 @@ def ask_stream(request: AskRequest, http: Request) -> StreamingResponse:
                     yield json.dumps({"type": "done", **finish(request, results, item).model_dump()}) + "\n"
                 else:
                     yield json.dumps({"type": "text", "text": item}) + "\n"
-        except anthropic.APIError:
+        except anthropic.APIError as error:
+            log_failure("claude", error)
             yield json.dumps({"type": "error", "detail": BUSY}) + "\n"
 
     return StreamingResponse(events(), media_type="application/x-ndjson")

@@ -30,3 +30,5 @@ infra/.terraform/
 infra/*.tfstate
 infra/*.tfstate.*
 infra/*.tfplan
+# My alert email and any other private Terraform settings
+infra/*.tfvars
