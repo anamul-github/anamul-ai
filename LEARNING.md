@@ -314,6 +314,7 @@
 - My alert email lives in `infra/terraform.tfvars`, which git ignores, so it's never in this public repo.
 - AWS emailed a confirmation link first; alerts only flow after I click it. Then I sent a test alarm on purpose, and the email arrived.
 - 66 tests (a new one checks the failure log line).
+- The deploy from GitHub then failed: "429 Too Many Requests: Data limit exceeded" from AWS's public image gallery (public.ecr.aws), where my base image and the streaming adapter come from. Anonymous downloads share a limit per internet address, and GitHub's runners are shared by thousands of projects. CloudTrail showed GitHub stopped right after logging in to ECR; the step's log showed the 429. Fix: `deploy.sh` signs in to the public gallery first (two small permissions on the deploy role). Deploy #4 worked.
 
 **My answer (1):** Whenever Claude or Voyage fails, my bot writes one small line in its logs, saying "an answer failed" and which service failed. CloudWatch counts those lines. If it counts 3 or more in 5 minutes, the alarm goes off and AWS emails me. So even if no visitor tells me, I find out, and I get another email when it's working again.
 
