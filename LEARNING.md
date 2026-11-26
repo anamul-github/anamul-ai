@@ -301,3 +301,22 @@
 **My answer (2):** My AWS role only trusts a token from my repo's main branch, and GitHub puts my account's and repo's permanent ID numbers inside that token. A fork is a different repo with a different ID, so AWS says no. Even a new repo with the same name would have a different ID.
 
 **My answer (3):** AWS refused GitHub's token because my role expected the old format, `repo:anamul-github/anamul-ai`. GitHub now adds the permanent IDs to it. Instead of guessing, we looked in CloudTrail, AWS's log of who tried to sign in, and it showed exactly what the token said. My repo's OIDC settings page confirmed it, so the fix was one line in Terraform.
+
+## Day 23 (Nov 26): Monitoring and cost alerts
+- Until today nothing told me if the bot broke. When Claude or Voyage fails, visitors see "busy, try again", and I'd only find out if someone mentioned it.
+- api.py now prints one JSON line per failed answer: `{"event": "answer_failed", "service": "claude", "error": "..."}`. A CloudWatch metric filter counts those lines.
+- `infra/monitoring.tf` adds an email topic (SNS) and three alarms:
+  - answer failures: 3+ in 5 minutes, with an "OK" email when it recovers
+  - Lambda errors: the bot crashed or timed out
+  - traffic spike: 200+ requests in an hour. My normal traffic is a few dozen a day, and the per-visitor limit doesn't stop many visitors at once.
+- A cost leak: the old "zero-spend" budget (an email at $0.01) had already fired. Every deploy left a ~300 MB image in ECR, and AWS kept all 19 (5.4 GB, about $0.50 a month and growing). Now an ECR lifecycle policy keeps the newest 5. Logs are kept 90 days instead of forever.
+- A new $5 monthly budget emails me at 80% spent, or when AWS forecasts going over. It replaced the $0.01 budget, which I deleted.
+- My alert email lives in `infra/terraform.tfvars`, which git ignores, so it's never in this public repo.
+- AWS emailed a confirmation link first; alerts only flow after I click it. Then I sent a test alarm on purpose, and the email arrived.
+- 66 tests (a new one checks the failure log line).
+
+**My answer (1):** Whenever Claude or Voyage fails, my bot writes one small line in its logs, saying "an answer failed" and which service failed. CloudWatch counts those lines. If it counts 3 or more in 5 minutes, the alarm goes off and AWS emails me. So even if no visitor tells me, I find out, and I get another email when it's working again.
+
+**My answer (2):** The limit is per visitor, so it stops one person, not many. Ten visitors, or a bot using many IP addresses, could each ask 20 questions an hour, and every answer costs me money on Claude. My normal traffic is a few dozen questions a day. So 200 in one hour means something is wrong, and I want to know before the bill grows.
+
+**My answer (3):** Every deploy left an old copy of my bot's image in AWS, and AWS kept all of them. After 19 deploys that was 5.4 GB, about 50 cents a month, growing with every deploy. My old zero-spend budget had already fired because of it. Now AWS keeps only the 5 newest images and deletes the rest automatically. A $5 monthly budget also emails me at 80% spent, or if AWS forecasts I'll go over.
