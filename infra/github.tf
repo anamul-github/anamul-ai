@@ -43,6 +43,12 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = "*"
       },
       {
+        # Sign in to AWS's public gallery, where my base images come from: higher download limits than anonymous
+        Effect   = "Allow"
+        Action   = ["ecr-public:GetAuthorizationToken", "sts:GetServiceBearerToken"]
+        Resource = "*"
+      },
+      {
         Effect = "Allow"
         Action = [
           "ecr:BatchCheckLayerAvailability",

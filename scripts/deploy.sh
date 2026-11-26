@@ -10,6 +10,9 @@ REPOSITORY="${REGISTRY}/anamul-ai"
 BUILD_INFO=$(mktemp)
 
 aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$REGISTRY" >/dev/null
+# The base image and the web adapter come from AWS's public gallery (public.ecr.aws). Downloading without
+# signing in has a shared limit, and GitHub's runners hit it ("429 Too Many Requests"). Signed in, the limit is mine.
+aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws >/dev/null
 docker buildx build --platform linux/arm64 --provenance=false -t "${REPOSITORY}:latest" --push --metadata-file "$BUILD_INFO" .
 
 # Deploy the exact image just built, by its digest (its fingerprint). Right after a push, the "latest" tag
