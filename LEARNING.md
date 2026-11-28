@@ -339,3 +339,16 @@
 **My answer (2):** The 20-question limit is counted inside each running copy of my bot, and Lambda could start up to 1,000 copies at once. So a crowd or a script spread across many copies could ask far more than 20 questions each. Capping Lambda at 10 copies puts a ceiling on how fast anyone can run up my Claude bill.
 
 **My answer (3):** First, my rules: the bot only answers from my writing, keeps its instructions to itself, and treats anything the visitor sends, even a fake "system" message or a made-up chat history, as a claim to check, not an order. Second, it has nothing to give away: my keys, address and private details were never in its data, and it can only write text, not do anything. Evals matter because a small change to the prompt or the model could quietly break this, so the attacks I tried today are now part of my test set.
+
+## Day 25 (Nov 28): README, Projects page and resume bullets
+- The README was a diary: complete, but a visitor had to read 24 days to understand the bot. Now it opens with what it is and the live link, then a diagram of how it works (GitHub draws Mermaid from text), engineering highlights with real numbers, the tech stack, the project layout and how to run it. The day-by-day log is kept, folded at the bottom.
+- It also had an outdated promise: "PostgreSQL + pgvector, LangGraph". Now it says why there's no vector database: 135 chunks search in memory in milliseconds, and a database would add a server to run and pay for.
+- The Projects card on my website: 43 eval questions and 71 tests (it said 40 and 65). I dropped "40/40 today": the full run today was 42/43, because one answer split an idea into 5 sentences. A score on a website goes stale; what the eval measures stays true.
+- Resume bullets: four full ones and a two-line version, every number one I can explain. No chat count: many saved chats were my own tests.
+- Numbers checked today: 71 tests, 43 eval questions, 135 chunks (5 articles, 2 book notes, 4 profile files), 21 AWS resources in Terraform.
+
+**My answer (1):** The log was written for me: what I learned each day, in order. A recruiter or engineer opening my repo has a minute, not 24 days. So the README now starts with what the bot is, how it works and what I'm proud of, with real numbers, and the daily log is still there, folded at the bottom for anyone who wants the full story.
+
+**My answer (2):** The score changes from run to run, because Claude's answers vary a little each time. The latest run was 42/43, while the card said 40/40. A fixed number on my website would soon be out of date or look too perfect. Saying what the eval checks, like privacy questions and prompt attacks, stays true and says more about how I work.
+
+**My answer (3):** Many of those chats were my own tests and checks after deploys, and I can't tell them apart from real visitors because I don't save names or IPs. Writing "143 conversations" would make it sound like more people used it than really did. Every number on my resume should be one I can explain honestly in an interview.

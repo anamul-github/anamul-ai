@@ -113,5 +113,6 @@ cd infra && terraform plan                   # compare my AWS setup with the cod
 - [x] Day 22: GitHub Actions: tests on every push, and a one-click deploy with no AWS keys in GitHub (OIDC)
 - [x] Day 23: monitoring and cost alerts: email alarms for failed answers, crashes and traffic spikes; a $5 budget; old images cleaned up
 - [x] Day 24: security review: no secrets in history, debug endpoints hidden on the live bot, Lambda capped at 10 copies, 0 known vulnerabilities, 8 prompt attacks resisted
+- [x] Day 25: this README, my website's project card, and resume bullets
 
 </details>
