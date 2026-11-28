@@ -39,7 +39,8 @@ Built in 30 days, November 2026: Python, FastAPI, Claude API, PostgreSQL + pgvec
 - [x] Day 21: my AWS setup as code with Terraform: 10 existing resources imported, 0 changed (`infra/`)
 - [x] Day 22: GitHub Actions: tests on every push, and a one-click deploy with no AWS keys in GitHub (OIDC)
 - [x] Day 23: monitoring and cost alerts: email alarms for failed answers, crashes and traffic spikes; a $5 budget; old images cleaned up
-- [ ] Next: a security review
+- [x] Day 24: security review: no secrets in history, debug endpoints hidden on the live bot, Lambda capped at 10 copies, 0 known vulnerabilities, 8 prompt attacks resisted
+- [ ] Next: README, Projects page and resume bullets
 - [ ] Nov 30: v1.0
 
 What I learned each day is in [LEARNING.md](LEARNING.md).
@@ -58,6 +59,6 @@ uv run python -m anamul_ai.embed        # Day 9: meaning fingerprints for every 
 ./scripts/deploy.sh                     # Day 12: build the Docker image, push it to ECR, update the Lambda function
 ./scripts/set_lambda_keys.sh            # Day 12: copy the API keys from .env into Lambda (prints nothing secret)
 uv run python -m anamul_ai.chats        # Day 15: read the latest saved chats and their thumbs up/down
-uv run python -m anamul_ai.evals        # Day 16: score the bot on 40 questions (real Claude, about 50 cents)
+uv run python -m anamul_ai.evals        # Day 16: score the bot on 43 questions (real Claude, about 50 cents)
 cd infra && terraform plan             # Day 21: compare my AWS setup with infra/ (needs `terraform init` once)
 ```
