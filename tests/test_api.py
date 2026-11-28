@@ -281,3 +281,17 @@ def test_on_lambda_the_rate_limit_uses_the_visitors_real_ip(fake_stream):
         context = json.dumps({"http": {"sourceIp": f"203.0.113.{number}"}})
         response = client.post("/ask/stream", json={"question": "hi"}, headers={"x-amzn-request-context": context})
         assert response.status_code == 200  # Different visitors don't use up each other's limit
+
+
+# --- Only the chat is public on the live bot ---
+
+@pytest.mark.parametrize("endpoint", ["/chunks", "/chunks/resume-3", "/search?q=salary", "/search/meaning?q=salary"])
+def test_debug_endpoints_are_hidden_on_the_live_bot(monkeypatch, endpoint):
+    monkeypatch.setattr("anamul_ai.api.ON_LAMBDA", True)
+    assert client.get(endpoint).status_code == 404
+
+
+def test_the_chat_still_works_on_the_live_bot(monkeypatch, fake_claude):
+    monkeypatch.setattr("anamul_ai.api.ON_LAMBDA", True)
+    assert client.post("/ask", json={"question": "hi"}).status_code == 200
+    assert client.get("/").status_code == 200  # Lambda's adapter checks this page to know the bot is ready

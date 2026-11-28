@@ -7,6 +7,9 @@ resource "aws_lambda_function" "bot" {
   architectures = ["arm64"]
   memory_size   = 2048 # More memory also means more CPU: cold starts went from ~13 s to ~4 s at 2 GB
   timeout       = 60
+  # At most 10 copies run at once. The per-visitor limit is counted in each copy, so this caps how fast a
+  # crowd or a script could run up my Claude bill. Extra requests get a "too many requests" error instead.
+  reserved_concurrent_executions = 10
 
   lifecycle {
     ignore_changes = [

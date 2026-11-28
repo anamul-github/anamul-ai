@@ -4,6 +4,7 @@ Run: uv run fastapi dev src/anamul_ai/api.py, then open http://127.0.0.1:8000/do
 """
 
 import json
+import os
 import re
 import time
 from collections import defaultdict, deque
@@ -13,7 +14,7 @@ from typing import Literal
 
 import anthropic
 import voyageai
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -35,7 +36,25 @@ STOP_WORDS = {
 MAX_QUESTIONS_PER_HOUR = 20
 recent_questions: dict[str, deque] = defaultdict(deque)  # Visitor's IP address -> times of their questions
 
-app = FastAPI(title="Anamul AI", description="Answers questions about Anamul Hasan, with sources.")
+# On Lambda (the live bot), only the chat endpoints are public. The rest are for learning and debugging on
+# my laptop: /search/meaning costs a Voyage call each time and has no rate limit, and /chunks dumps everything.
+ON_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+
+
+def local_only() -> None:
+    """Hide an endpoint on the live bot: it answers 404, as if it didn't exist."""
+    if ON_LAMBDA:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+
+app = FastAPI(
+    title="Anamul AI",
+    description="Answers questions about Anamul Hasan, with sources.",
+    # The interactive docs and the API's map: on my laptop only
+    docs_url=None if ON_LAMBDA else "/docs",
+    redoc_url=None if ON_LAMBDA else "/redoc",
+    openapi_url=None if ON_LAMBDA else "/openapi.json",
+)
 
 # Browsers only let these sites call the API: my website, its Vercel previews, and local development
 app.add_middleware(
@@ -87,7 +106,7 @@ def home() -> dict:
     return {"name": "Anamul AI", "chunks": len(CHUNKS), "docs": "/docs"}
 
 
-@app.get("/chunks")
+@app.get("/chunks", dependencies=[Depends(local_only)])
 def list_chunks(type: str | None = None) -> list[Chunk]:
     """All chunks, or only one type: article, book-note, resume, about or projects."""
     if type is None:
@@ -95,7 +114,7 @@ def list_chunks(type: str | None = None) -> list[Chunk]:
     return [chunk for chunk in CHUNKS if chunk.type == type]
 
 
-@app.get("/chunks/{chunk_id}")
+@app.get("/chunks/{chunk_id}", dependencies=[Depends(local_only)])
 def get_chunk(chunk_id: str) -> Chunk:
     """One chunk by its id, like resume-3."""
     for chunk in CHUNKS:
@@ -104,7 +123,7 @@ def get_chunk(chunk_id: str) -> Chunk:
     raise HTTPException(status_code=404, detail=f"No chunk with id {chunk_id}")
 
 
-@app.get("/search")
+@app.get("/search", dependencies=[Depends(local_only)])
 def search(q: str, limit: int = 5) -> list[SearchResult]:
     """Keyword search: the chunks that share the most words with the question.
 
@@ -120,7 +139,7 @@ def search(q: str, limit: int = 5) -> list[SearchResult]:
     return results[:limit]
 
 
-@app.get("/search/meaning")
+@app.get("/search/meaning", dependencies=[Depends(local_only)])
 def meaning_search(q: str, limit: int = 5) -> list[SearchResult]:
     """Meaning search: the chunks whose embeddings are closest to the question's, even with no shared words."""
     question = embed_query(q)
