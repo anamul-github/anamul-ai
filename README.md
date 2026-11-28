@@ -6,6 +6,8 @@ An AI version of me on my website. Visitors, from recruiters to friends, ask abo
 
 **Try it:** [anamulhasan.com/chat](https://www.anamulhasan.com/chat), or the "Ask my AI avatar" box on my homepage.
 
+**Version 1.0**, released November 28, 2026.
+
 I built it in November 2026, one hour a day, to learn Python, applied AI and AWS by building something real. What I learned each day is in [LEARNING.md](LEARNING.md).
 
 ## How it works
@@ -114,5 +116,6 @@ cd infra && terraform plan                   # compare my AWS setup with the cod
 - [x] Day 23: monitoring and cost alerts: email alarms for failed answers, crashes and traffic spikes; a $5 budget; old images cleaned up
 - [x] Day 24: security review: no secrets in history, debug endpoints hidden on the live bot, Lambda capped at 10 copies, 0 known vulnerabilities, 8 prompt attacks resisted
 - [x] Day 25: this README, my website's project card, and resume bullets
+- [x] v1.0 (Nov 28): version 1.0.0 in the code and the live bot, and "v1.0" in the chat on my website
 
 </details>

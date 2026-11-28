@@ -1,12 +1,15 @@
 """Tests for the API. They read data/chunks.jsonl (run anamul_ai.chunk first) and need no API keys."""
 
 import json
+import tomllib
+from pathlib import Path
 
 import anthropic
 import httpx
 import pytest
 from fastapi.testclient import TestClient
 
+from anamul_ai import __version__
 from anamul_ai.answer import Answer
 from anamul_ai.api import MAX_QUESTIONS_PER_HOUR, app, recent_questions
 
@@ -45,6 +48,15 @@ def test_home_says_how_many_chunks_there_are():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json()["chunks"] > 0
+
+
+def test_home_says_which_version_is_running():
+    assert client.get("/").json()["version"] == __version__
+
+
+def test_the_version_matches_pyproject():
+    pyproject = tomllib.loads(Path("pyproject.toml").read_text())
+    assert pyproject["project"]["version"] == __version__
 
 
 def test_chunks_can_be_filtered_by_type():

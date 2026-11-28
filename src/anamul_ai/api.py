@@ -19,6 +19,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from anamul_ai import __version__
 from anamul_ai.answer import Answer, stream_answer, write_answer
 from anamul_ai.chats import save_chat, save_feedback
 from anamul_ai.embed import embed_query, load_embeddings, similarity
@@ -50,6 +51,7 @@ def local_only() -> None:
 app = FastAPI(
     title="Anamul AI",
     description="Answers questions about Anamul Hasan, with sources.",
+    version=__version__,
     # The interactive docs and the API's map: on my laptop only
     docs_url=None if ON_LAMBDA else "/docs",
     redoc_url=None if ON_LAMBDA else "/redoc",
@@ -103,7 +105,7 @@ VECTORS = load_embeddings()  # Chunk id -> embedding; empty until embed.py has r
 
 @app.get("/")
 def home() -> dict:
-    return {"name": "Anamul AI", "chunks": len(CHUNKS), "docs": "/docs"}
+    return {"name": "Anamul AI", "version": __version__, "chunks": len(CHUNKS)}
 
 
 @app.get("/chunks", dependencies=[Depends(local_only)])
